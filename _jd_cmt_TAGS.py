@@ -94,9 +94,12 @@ if __name__ == '__main__':
                     pos = i
             itemID=temp[pos+1:]
             print(itemID)
-            if(len(itemID)>18):
+            if(len(webpage)>35):
                 continue
             print (itemID)
-            itemID=int(itemID)
-            crawl_jd_cmt_tag(itemID)
-            time.sleep(random.random() * 5)
+            try:
+                itemID=int(itemID)
+                crawl_jd_cmt_tag(itemID)
+                time.sleep(random.random() * 5)
+            except:
+                print("Invalid Input!")
