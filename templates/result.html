@@ -28,6 +28,39 @@ $def with (kw,contents)
 		<div class="row">
 			<div class="col-lg-2">
 				<h3>results</h3>
+				<form  style="padding-bottom:10px"
+					   class="form-group" method="POST" action="/container">
+					<form class="form-group">
+					<label for="view" class="col-sm-2 control-label">View by</label>
+					<label class="checkbox-inline">
+						<input type="radio" id="view" value="list"> list
+					</label>
+					<label class="checkbox-inline">
+						<input type="radio" id="view" value="pict"> picture
+					</label>
+					</form>
+
+					<form class="form-group">
+					<label for="filter" class="col-sm-2 control-label">Brand</label>
+					<label class="checkbox-inline">
+						<input type="checkbox" id="filter" value="123"> HUAWEI ...
+					</label>
+					</form>
+
+					<form class="form-group">
+					<label for="filter" class="col-sm-2 control-label">Price</label>
+					<label class="checkbox-inline">
+						<input type="checkbox" id="filter" value="123">
+					</label>
+					</form>
+
+
+                    <input type="file" id="input_img" name="input_img">
+					<button type="submit" class="btn btn-default" id="Search" name="Search">搜索</button>
+				</form>
+
+
+
 			</div>
 			<div class="col-lg-10" style="padding-top: 15px;">
 				<form class="form-group" action="/search" method="GET">
@@ -41,17 +74,16 @@ $def with (kw,contents)
 		</div>
 
 
-
 <div class='result_contents'>
 	$ count = 0
 	$for item in contents:
 		$ count += 1
 		<div class='col-md-3'>
-			<div class='imgsec' id='res$(count)'>
+			<div class='res' id='res$(count)'>
 				<a class='thumbnail' href='$(item[1])'>
 					<img class='img-responsive' src='$(item[0])' alt='$(item[2])'>
 					<p class='imgtext'>$(item[2])</p>
-				</a>"
+				</a>
 			</div>
 		</div>
 </div>

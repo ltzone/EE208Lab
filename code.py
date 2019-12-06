@@ -1,28 +1,9 @@
 # coding=UTF-8
 import web
-from web import form
-import urllib2
 import sys, os, lucene
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from java.io import File
-from org.apache.lucene.analysis.core import SimpleAnalyzer
-from org.apache.lucene.index import DirectoryReader
-from org.apache.lucene.queryparser.classic import QueryParser
-from org.apache.lucene.store import SimpleFSDirectory
-from org.apache.lucene.search import IndexSearcher
-from org.apache.lucene.util import Version
-from org.apache.lucene.search import BooleanQuery
-from org.apache.lucene.search import BooleanClause
-import jieba
-
-from org.apache.lucene.search.highlight import Fragmenter
-from org.apache.lucene.search.highlight import Highlighter
-from org.apache.lucene.search.highlight import InvalidTokenOffsetsException
-from org.apache.lucene.search.highlight import QueryScorer
-from org.apache.lucene.search.highlight import SimpleHTMLFormatter
-from org.apache.lucene.search.highlight import SimpleSpanFragmenter
 
 from SearchPicts import img_func
 
@@ -38,6 +19,7 @@ urls = (
     '/search', 'search',
     '/moreidx', 'moreidx',
     '/logoidx', 'logoidx',
+    '/filter', 'filter',
 )
 
 
