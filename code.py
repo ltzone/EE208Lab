@@ -1,11 +1,14 @@
 # coding=UTF-8
 import web
+
 import sys, os, lucene
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
 from SearchPicts import img_func
+from logo_sift import logo_recognition
+
 
 try:
     vm_env = lucene.initVM(vmargs=['-Djava.awt.headless=true'])
@@ -41,21 +44,19 @@ class logoidx:
     def POST(self):
         x = web.input(input_img={})
         filedir = 'static/userupload'
-          # change this to the directory you want to store the file in.
         if 'input_img' in x:  # to check if the file-object is created
             fout = open(filedir + '/' + 'tmp', 'wb')
             # creates the file where the uploaded file should be stored
             fout.write(x.input_img.file.read())
             # writes the uploaded file to the newly created file.
             fout.close()  # closes the file, upload complete.
-        web.header("Content-Type", "text/html; charset=utf-8")
-        return """<html><head></head><body>
-        <img src="static/userupload/tmp"> </img>
-        </body></html>""" # a demo for the input image
 
-        # here you can call the SURF function and return a keyword
-        # call search function  contents = img_func(kw)
-        # then return render.result(keyword,contents)
+        kw = logo_recognition("static/userupload/tmp")
+        vm_env.attachCurrentThread()
+        contents = img_func(kw)
+        web.header("Content-Type", "text/html; charset=utf-8")
+        return render.result(kw, contents) # a demo for the input image
+
 
 
 
