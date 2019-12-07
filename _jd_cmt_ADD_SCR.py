@@ -79,7 +79,7 @@ def crawl_jd_cmt_SCORE(prdtId=100009691096):# change for url
             video =r_json_Sum['videoCount']
             after =r_json_Sum['afterCount']
 
-            score=int(rate*0.7+math.log10(sumcmt)*0.2+
+            score=int(rate*0.7+math.log10(sumcmt)*5+
                           ((after+video)*1.0)/sumcmt/0.05)
 
 
@@ -95,7 +95,7 @@ def crawl_jd_cmt_SCORE(prdtId=100009691096):# change for url
 
 if __name__ == '__main__':
 
-    with open("Fi-index.txt",'r') as f:
+    with open("Final_available_idx.txt",'r') as f:
         for line in f.readlines():
             pp = line.split('\t')
             webpage = pp[1].strip('\n')
