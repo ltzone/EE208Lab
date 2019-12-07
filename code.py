@@ -6,7 +6,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-from Search import search
+import search
 from logo_sift import logo_recognition
 
 
@@ -53,8 +53,10 @@ class logoidx:
 
         kw = logo_recognition("static/userupload/tmp")
         vm_env.attachCurrentThread()
+        filtertags = total(contents)
         contents = search(kw,'relativity')
-        return render.result(kw, method, contents) # a demo for the input image
+        results = itemlis(contents)
+        return render.result(kw, method, results, filtertags) # a demo for the input image
 
 class search:
     def GET(self):
@@ -62,16 +64,26 @@ class search:
         kw = user_data.keyword
         method = web.input(method="relativity")
         vm_env.attachCurrentThread()
-        contents = search(kw,method)
-        return render.result(kw, method, contents)
+        contents = search(kw,method)           # 搜索结果
+        filtertags = total(contents)           # 统计品牌、属性、特色的结果，即显示在页面左侧所必须的内容
+        results = itemlis(contents)   # 要显示在页面右侧的所必需的内容
+        return render.result(kw, method, results, filtertags)
 
 class filter:
     def GET(self):
         user_data = web.input()
         kw = user_data.keyword
+        method = web.input(method="relativity")
+        category = web.input(category=[])
+        features = web.input(feature=[])
+        brand = web.input(brand=[])
         vm_env.attachCurrentThread()
-        contents = search(kw,method)
-        return render.result(kw, method, contents)
+        contents = search(kw,method) # 搜索结果
+        filtertags = total(contents) # 统计品牌、属性、特色的结果，即显示在页面左侧所必须的内容
+        filtered_contents = filter(contents,category,features,brand)
+                                     # 对搜索结果作筛选
+        results = itemlis(filtered_contents) # 根据筛选结果提取出要显示在页面右侧的所必需的内容
+        return render.result(kw, method, results, filtertags)
 
 
 

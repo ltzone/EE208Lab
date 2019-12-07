@@ -19,6 +19,8 @@ from org.apache.lucene.search import BooleanQuery
 from org.apache.lucene.search import BooleanClause
 import jieba
 
+
+
 '''
 field assumption:
 field name   |  indexed  |  stored | tokenized | record freq&position
@@ -63,7 +65,7 @@ def read_results(scoreDocs):
 
 def highprice_search(searcher, analyzer, command):
     # 按价格降序排序
-    highprice_sorter = Sort(SortField("price",SortField.LONG,true))
+    highprice_sorter = Sort(SortField("price",SortField.LONG,True))
     seg_list = jieba.cut(command)
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "contents",
@@ -98,11 +100,96 @@ def search(query,method):
     analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
     return globals()[method+'_search'](searcher,analyzer,query)
 
+'''
+中间格式contents = (json object):
+dict {
+    imgurl
+    url
+    title
+    brand
+    price
+    rank
+    attr {
+        text: text
+        ...
+    }
+    feature{
+        text: num
+        ...
+    }
+}
+'''
+
+def filter(contents,categorys,features,brands):
+    results = list()
+    for item in contents:
+        item = json.loads(item)
+        if match_item(item,categorys,features,brands):
+            results.append(item)
+    return results
+
+def match_item(item,categorys,features,brands):
+    if not match_item_one(item,categorys,'category'):
+        return False
+    if not match_item_one(item,features,'feature'):
+        return False
+    if not match_item_one(item,brands,'brand'):
+        return False
+    return True
+
+def match_item_one(item,properties,property_name):
+    if (not properties):
+        for proper in properties:
+            if proper in item[property_name].keys():
+                return True
+    return False
+
+
+def sort_and_filter(x_count,length):
+    x_tuple = zip(x_count.keys(),x_count.values())
+    x_sorted = sorted(x_tuple)
+    filtered_x = x_sorted[:length]
+    return filtered_x
+
+def total(contents):
+    # 返回三个参数的tuple，三个长度最长为n的[(key,num)]列表，分别是brand，category和feature的tag
+    brand_count = dict()
+    category_count = dict()
+    feature_count = dict()
+    for item in contents:
+        item = json.loads(item)
+        brand = item['brand']
+        category = item['category']
+        features = item['feature']
+        if not brand_count.has_key(brand):
+            brand_count[brand] = 0
+        brand_count[brand] += 1
+        if not categorycount.has_key(category):
+            category_count[category] = 0
+        category_count[category] += 1
+        for feature in features.keys():
+            if not feature_count.has_key(feature):
+                feature_count[feature] = 0
+            feature_count[features] += features[feature]
+    brand_tags = sort_and_filter(brand_count,5)
+    category_tags = sort_and_filter(categorycount,5)
+    feature_tags = sort_and_filter(features,10)
+    return (brand_tags,category_tags,feature_tags)
+
+
+def itemlis(contents):
+    res_lis = []
+    for item in contents:
+        item = json.loads(item)
+        res_lis.append((item["imgurl"],item["url"],item["title"]))
+    return res_lis
+
+
 
 '''
 if __name__ == '__main__':
     STORE_DIR = "index"
-    lucene.initVM(vmargs=['-Djava.awt.headless=true'])
+    lucene.initVM(vmargs=['-Djava.awt.headless=True'])
     print 'lucene', lucene.VERSION
     #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
     #directory = SimpleFSDirectory(File(STORE_DIR))
