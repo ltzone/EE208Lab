@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+
 import sys
 import urllib2
 from bs4 import BeautifulSoup
@@ -28,9 +30,10 @@ def parse(url,content):
         if (src == '' or not (src.endswith('jpg') or src.endswith('png'))):
             continue
         src = 'http:' + src
-        with open(url + '.txt', 'a') as f:
-            f.write(src)
-            f.write('\n')
+        with open(url + '.txt', 'a') as f3:
+            f3.write(src)
+            print src
+            f3.write('\n')
 
 
     # other
@@ -44,6 +47,7 @@ def parse(url,content):
         c2=c1[0].split("：")
         with open(url + '.txt', 'a') as f:
             f.write(c2[1])
+            print c2[1]
             f.write('\n')
         #dict1[c2[0]]=c2[1]
 
@@ -53,6 +57,7 @@ def parse(url,content):
             #dict1['brand'] = brand
             with open(url + '.txt', 'a') as f:
                 f.write(brand)
+                print brand
                 f.write('\n')
 
         # price
@@ -64,6 +69,7 @@ def parse(url,content):
         #dict1['price'] = content2[a + 5:b]
         with open(url + '.txt', 'a') as f:
             f.write(content2[a + 5:b])
+            print content2[a + 5:b]
             f.write('\n')
 
         # attribute
@@ -72,6 +78,7 @@ def parse(url,content):
             #dict1['type'] = item
             with open(url + '.txt', 'a') as f:
                 f.write(item)
+                print item
                 f.write('\n')
 
         # other information
@@ -84,6 +91,7 @@ def parse(url,content):
                 f.write(':')
                 f.write(c2[1])
                 f.write('\t')
+            print 'ok\n'
                 #dict1[c2[0]]=c2[1]
 
 
@@ -98,7 +106,7 @@ def valid_filename(s):
 
 def getdetail(url):
     filename = valid_filename(url)
-    dict1['title'] = getTitle(url)
+    #dict1['title'] = getTitle(url)
     with open(filename + '.txt', 'w') as f:
         f.write(getTitle(url))
         f.write('\n')
@@ -106,7 +114,7 @@ def getdetail(url):
         f.write('\n')
         f.close()
     content = urllib2.urlopen(url).read()
-    parsejingdong(filename, content)
+    parse(filename, content)
 
 
 def main():
