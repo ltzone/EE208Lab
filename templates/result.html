@@ -56,6 +56,9 @@ $def with (kw,method,contents,filtertags)
 	    		formaction="/search?keyword=$kw" name="rank" method="GET">评价</button>
 	</form>
 		<HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="80%" color=#987cb9 SIZE=3>
+	
+
+
 	<form style="padding-bottom:10px;margin-left:10px"
 	   class="form-group" method="GET" action="/filter?keyword=$kw&method=$method">
 		<h4 class="filter-title">Brand</h4>
@@ -65,7 +68,7 @@ $def with (kw,method,contents,filtertags)
 		<label class="checkbox">
 			<input type="checkbox" name="brand" id="brand" value="SONY"> SONY ...
 		</label>
-
+<!--
 
 		<HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="80%" color=#987cb9 SIZE=3>
 
@@ -76,20 +79,39 @@ $def with (kw,method,contents,filtertags)
 			<label class="control-label-inline" for="ub">~</label>
 			<input type="text" class="form-control-inline" name="ub" id="ub" placeholder="Upper Bound">
 
+-->
+
 
 		<HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="80%" color=#987cb9 SIZE=3>
 
-		<h4 class="filter-title">Category</h4>
-		<label class="checkbox">
-			<input type="checkbox" name="category" id="category" value="123"> phone...
-		</label>
+		<h4 class="filter-title">品牌</h4>
+		$ count = 0
+		$for branditem in filtertags[0]:
+			<label class="checkbox">
+				<input type="checkbox" name="brand" id="brand$(count)" value="branditem[0]"> $(branditem[0])($(branditem[1]))
+			</label>
+			$ count += 1
 
 		<HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="80%" color=#987cb9 SIZE=3>
 
-		<h4 class="filter-title">Feature</h4>
-		<label class="checkbox">
-			<input type="checkbox" name="category" id="feature" value="123"> good...
-		</label>
+		<h4 class="filter-title">种类</h4>
+		$ count = 0
+		$for categoryitem in filtertags[1]:
+			<label class="checkbox">
+				<input type="checkbox" name="category" id="category$(count)" value="categoryitem[0]"> $(categoryitem[0])($(categoryitem[1]))
+			</label>
+			$ count += 1
+
+		<HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="80%" color=#987cb9 SIZE=3>
+
+		<h4 class="filter-title">评价</h4>
+		$ count = 0
+		$for featureitem in filtertags[2]:
+			<label class="checkbox">
+				<input type="checkbox" name="feature" id="feature$(count)" value="featureitem[0]"> $(featureitem[0])($(featureitem[1]))
+			</label>
+			$ count += 1
+
 		<button type="submit" class="btn btn-default" id="Search" name="Search">搜索</button>
 	</form>
 </div>
