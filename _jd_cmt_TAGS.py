@@ -49,7 +49,7 @@ def crawl_jd_cmt_tag(prdtId=100009691096):# change for url
                        r'\jd_cmt_tags\httpsitem.jd.com%s.html.txt'%prdtId
 
     try:
-        r=requests.get(url,headers=headers)
+        r=requests.get(url,headers=headers,timeout=5)
         r.raise_for_status()
     except:
         print ('爬取失败')
@@ -70,14 +70,11 @@ def crawl_jd_cmt_tag(prdtId=100009691096):# change for url
         # 追加模式，逐行写入
 
         for r_json_tag in r_json_tags:
-            if os.path.exists(comment_tag_path):
-                break
-            #print(11)
             with open(comment_tag_path,'a+') as file:
                 file.write(r_json_tag['name']+'\t'+str(r_json_tag['count'])+'\n')
                 print(r_json_tag['name']+'\t'+str(r_json_tag['count']))
     except:
-        print('not json')
+        print('large json')
 
 
 if __name__ == '__main__':
@@ -100,6 +97,6 @@ if __name__ == '__main__':
             try:
                 itemID=int(itemID)
                 crawl_jd_cmt_tag(itemID)
-                time.sleep(random.random() * 5)
+                time.sleep(random.random() * 3)
             except:
                 print("Invalid Input!")
