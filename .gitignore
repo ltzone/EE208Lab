@@ -1,3 +1,9 @@
+.idea/
+Crawler/Fi-html/
+Crawler/Fi-index.txt
+logo_recognition/logo_images
+static/userupload
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
