@@ -6,7 +6,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-from SearchPicts import img_func
+from Search import search
 from logo_sift import logo_recognition
 
 
@@ -53,20 +53,27 @@ class logoidx:
 
         kw = logo_recognition("static/userupload/tmp")
         vm_env.attachCurrentThread()
-        contents = img_func(kw)
-        web.header("Content-Type", "text/html; charset=utf-8")
-        return render.result(kw, contents) # a demo for the input image
-
-
-
+        contents = search(kw,'relativity')
+        return render.result(kw, method, contents) # a demo for the input image
 
 class search:
     def GET(self):
         user_data = web.input()
         kw = user_data.keyword
+        method = web.input(method="relativity")
         vm_env.attachCurrentThread()
-        contents = img_func(kw)
-        return render.result(kw, contents)
+        contents = search(kw,method)
+        return render.result(kw, method, contents)
+
+class filter:
+    def GET(self):
+        user_data = web.input()
+        kw = user_data.keyword
+        vm_env.attachCurrentThread()
+        contents = search(kw,method)
+        return render.result(kw, method, contents)
+
+
 
 
 
