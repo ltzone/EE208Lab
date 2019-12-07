@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 import jieba as jb
 #导入结巴分词(关键词提取)
 import jieba.analyse
+import math
 
 
 
@@ -38,7 +39,7 @@ headers = {'User-Agent':'Mozilla/5.0 '
 
 
 #cookies=***
-def crawl_jd_cmt_tag(prdtId=100009691096):# change for url
+def crawl_jd_cmt_SCORE(prdtId=100009691096):# change for url
 
     url=r"https://sclub.jd.com/comment/" \
         r"productPageComments.action?callback=fetchJSON_comment98vv1279&" \
@@ -46,7 +47,7 @@ def crawl_jd_cmt_tag(prdtId=100009691096):# change for url
         r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1"%prdtId
     comment_tag_path = r'C:\TC-prog\JetBrain_pycharm_TC' \
                        r'\PycharmProjects\Crawler_EEFinal' \
-                       r'\jd_cmt_tags\httpsitem.jd.com%s.html.txt'%prdtId
+                       r'\jd_cmt_SCORE\httpsitem.jd.com%s.html.txt'%prdtId
 
     try:
         r=requests.get(url,headers=headers,timeout=5)
@@ -64,15 +65,30 @@ def crawl_jd_cmt_tag(prdtId=100009691096):# change for url
         r_json_str = r.text[pos + 1:-2]
         # print (r_json_str)
         r_json_obj=json.loads(r_json_str,strict=False)
-        print (r_json_obj)
-        r_json_tags=r_json_obj['hotCommentTagStatistics']
-        print ('狗东评论标签：')
+        #print (r_json_obj)
+        r_json_Sum=r_json_obj['productCommentSummary']
+        print ('狗东评论打分：')
+        print(r_json_Sum)
         # 追加模式，逐行写入
+        with open(comment_tag_path, 'w') as file:
+            sumcmt=r_json_Sum['commentCount']
+            rate=r_json_Sum['goodRateShow'] # 好评率*100
+            #good=r_json_Sum['goodCount'] # 好评数
+            #gen =r_json_Sum['generalCount'] # 中评数
+            #poor=r_json_Sum['poorCount'] # 差评数
+            video =r_json_Sum['videoCount']
+            after =r_json_Sum['afterCount']
 
-        for r_json_tag in r_json_tags:
-            with open(comment_tag_path,'a+') as file:
-                file.write(r_json_tag['name']+'\t'+str(r_json_tag['count'])+'\n')
-                print(r_json_tag['name']+'\t'+str(r_json_tag['count']))
+            score=int(rate*0.7+math.log10(sumcmt)*0.2+
+                          ((after+video)*1.0)/sumcmt/0.05)
+
+
+            file.write("httpitem.jd.com"+str(prdtId) +".html"
+                       + '\t' + str(score) + '\n')
+            print("httpsitem.jd.com"+str(prdtId) +".html"
+                       + '\t' + str(score))
+
+
     except:
         print('large json')
 
@@ -96,7 +112,7 @@ if __name__ == '__main__':
             print (itemID)
             try:
                 itemID=int(itemID)
-                crawl_jd_cmt_tag(itemID)
+                crawl_jd_cmt_SCORE(itemID)
                 time.sleep(random.random() * 3)
             except:
                 print("Invalid Input!")
