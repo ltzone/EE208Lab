@@ -1,5 +1,18 @@
 $def with (kw,method,contents,filtertags)
 
+
+$def showdetails(details):
+	<dl class="dl-horizontal">
+	$for detail in (details):
+		<dt>$(detail)</dt><dd>$(details[detail])</dd>
+	</dl>
+
+
+$def showfeatures(features):
+	$for feature in (features):
+		<button type="button" class="btn btn-default btn-sm">$(feature) ($(features[feature]))</button>
+
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -106,6 +119,14 @@ $def with (kw,method,contents,filtertags)
 			</label>
 			$ count += 1
 
+		<h4 class="filter-title">电商</h4>
+		$ count = 0
+		$for featureitem in filtertags[3]:
+			<label class="checkbox">
+				<input type="checkbox" name="source" id="source$(count)" value="$(featureitem[0])"> $(featureitem[0])($(featureitem[1]))
+			</label>
+			$ count += 1
+
 		<button type="submit" class="btn btn-default" id="Search" name="Search">搜索</button>
 	</form>
 </div>
@@ -115,12 +136,37 @@ $def with (kw,method,contents,filtertags)
 		$ count = 0
 		$for item in contents:
 			$ count += 1
-			<div class='col-md-3'>
+			<div class='row'>
 				<div class='res' id='res$(count)'>
-					<a class='thumbnail' href='$(item[1])'>
-						<img class='img-responsive' src='$(item[0])' alt='$(item[2])'>
-						<p class='imgtext'>$(item[2])</p>
-					</a>
+					<div class='col-md-3'>
+						<a class='thumbnail' href='$(item["url"])'>
+							<img class='img-responsive' src='$(item["imgurl"])' alt='$(item["title"])'>
+						</a>
+					</div>
+					<div class='col-md-9'>
+						<div class='row'>
+							<a class="thumbnail" href='$(item["url"])'>
+							<h3 style="width: 90%;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;">
+								$(item["title"])
+							</h3>
+							</a>
+						</div>
+						<div>
+							<div class="col-md-4">
+								<h4 class="price">￥ $("{:.2f}".format(int(item["price"])/100)) </h4>
+								<p class="attributes"> $(item["category"]), $(item["brand"]), 评分 $(item["rank"])
+								</p>
+							<div>
+								$:showfeatures((item["feature"]))
+							</div>
+							</div>
+							<div class="col-md-8">
+								$:showdetails((item["detail"]))
+							</div>
+						</div>
+						
+					</div>
+
 				</div>
 			</div>
 	</div>

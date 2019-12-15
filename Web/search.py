@@ -53,6 +53,7 @@ def read_results(scoreDocs, searcher):
         item['price'] = doc.get("price")
         item['rank'] = doc.get("rank")
         item['category'] = doc.get("attribute")
+        item['source'] = doc.get("website")
 
         # 商品具体属性
         itemdet = dict()
@@ -144,20 +145,22 @@ dict {
 }
 '''
 
-def tag_filter(contents,categorys,features,brand):
+def tag_filter(contents,categorys,features,brand,source):
     results = list()
     for item in contents:
         item2 = json.loads(item)
-        if match_item(item2,categorys,features,brand):
+        if match_item(item2,categorys,features,brand,source):
             results.append(item)
     return results
 
-def match_item(item,categorys,features,brands):
+def match_item(item,categorys,features,brands,sources):
     if not match_item_one(item,categorys,'category'):
         return False
     if not match_item_feature(item,features,'feature'):
         return False
     if not match_item_one(item,brands,'brand'):
+        return False
+    if not match_item_one(item,sources,'source'):
         return False
     return True
 
@@ -189,17 +192,22 @@ def total(contents):
     brand_count = dict()
     category_count = dict()
     feature_count = dict()
+    source_count = dict()
     for item in contents:
         item = json.loads(item)
         brand = item['brand']
         category = item['category']
         feature = item['feature']
+        source = item['source']
         if not brand_count.has_key(brand):
             brand_count[brand] = 0
         brand_count[brand] += 1
         if not category_count.has_key(category):
             category_count[category] = 0
         category_count[category] += 1
+        if not source_count.has_key(source):
+            source_count[source] = 0
+        source_count[source] += 1
         for (felem,fnum) in feature.items():
             if not feature_count.has_key(felem):
                 feature_count[felem] = 0
@@ -207,15 +215,15 @@ def total(contents):
 
     brand_tags = sort_and_filter(brand_count,5)
     category_tags = sort_and_filter(category_count,5)
+    source_tags = sort_and_filter(source_count,2)
     feature_tags = sort_and_filter(feature_count,10)
-    return [brand_tags,category_tags,feature_tags]
+    return [brand_tags,category_tags,feature_tags,source_tags]
 
 
 def itemlis(contents):
     res_lis = []
     for item in contents:
-        item = json.loads(item)
-        res_lis.append((item["imgurl"],item["url"],item["title"]))
+        res_lis.append(json.loads(item))
     return res_lis
 '''
 item
@@ -223,9 +231,6 @@ item
 1 - url
 2 - title
 3 - property
-
-
-
 
 '''
 
