@@ -119,6 +119,14 @@ $def showfeatures(features):
 			</label>
 			$ count += 1
 
+		<h4 class="filter-title">电商</h4>
+		$ count = 0
+		$for featureitem in filtertags[3]:
+			<label class="checkbox">
+				<input type="checkbox" name="source" id="source$(count)" value="$(featureitem[0])"> $(featureitem[0])($(featureitem[1]))
+			</label>
+			$ count += 1
+
 		<button type="submit" class="btn btn-default" id="Search" name="Search">搜索</button>
 	</form>
 </div>
