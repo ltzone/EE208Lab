@@ -214,8 +214,7 @@ def total(contents):
 def itemlis(contents):
     res_lis = []
     for item in contents:
-        item = json.loads(item)
-        res_lis.append((item["imgurl"],item["url"],item["title"]))
+        res_lis.append(json.loads(item))
     return res_lis
 '''
 item
