@@ -17,8 +17,6 @@ from org.apache.lucene.search import IndexSearcher
 from org.apache.lucene.util import Version
 from org.apache.lucene.search import BooleanQuery
 from org.apache.lucene.search import BooleanClause
-from org.apache.lucene.search import Sort
-from org.apache.lucene.search import SortField
 import jieba
 
 
@@ -71,7 +69,7 @@ def read_results(scoreDocs, searcher):
 
 def highprice_search(searcher, analyzer, command):
     # 按价格降序排序
-    highprice_sorter = Sort(SortField("price",SortField.Type.LONG,True))
+    highprice_sorter = Sort(SortField("price",SortField.LONG,True))
     seg_list = jieba.cut(command)
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
@@ -81,7 +79,7 @@ def highprice_search(searcher, analyzer, command):
 
 def lowprice_search(searcher, analyzer, command):
     # 按价格升序排序
-    lowprice_sorter = Sort(SortField("price",SortField.Type.LONG))
+    lowprice_sorter = Sort(SortField("price",SortField.LONG))
     seg_list = jieba.cut(command)
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
@@ -90,7 +88,7 @@ def lowprice_search(searcher, analyzer, command):
     return read_results(scoreDocs,searcher)
 
 def rank_search(searcher, analyzer, command):
-    rank_sorter = Sort(SortField("rank",LONG))
+    rank_sorter = Sort(SortField("rank",SortField.LONG))
     seg_list = jieba.cut(command)
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
@@ -137,38 +135,30 @@ dict {
 }
 '''
 
-def tag_filter(contents,categorys,features,brand):
+def tag_filter(contents,categorys,features,brands):
     results = list()
     for item in contents:
-        item2 = json.loads(item)
-        if match_item(item2,categorys,features,brand):
+        item = json.loads(item)
+        if match_item(item,categorys,features,brands):
             results.append(item)
     return results
 
 def match_item(item,categorys,features,brands):
     if not match_item_one(item,categorys,'category'):
         return False
-    if not match_item_feature(item,features,'feature'):
+    if not match_item_one(item,features,'feature'):
         return False
     if not match_item_one(item,brands,'brand'):
         return False
     return True
 
-def match_item_feature(item,properties,property_name):
-    if (not properties):
-        return True
-    for proper in properties:
-        if proper in item[property_name].keys():
-            return True
-    return False
-
 def match_item_one(item,properties,property_name):
     if (not properties):
-        return True
-    for proper in properties:
-        if proper == item[property_name]:
-            return True
+        for proper in properties:
+            if proper in item[property_name].keys():
+                return True
     return False
+
 
 def sort_and_filter(x_count,length):
     x_tuple = zip(x_count.keys(),x_count.values())
@@ -185,6 +175,9 @@ def total(contents):
         item = json.loads(item)
         brand = item['brand']
         category = item['category']
+    
+    ###    features = item['feature']
+     
         if not brand_count.has_key(brand):
             brand_count[brand] = 0
         brand_count[brand] += 1
@@ -192,17 +185,26 @@ def total(contents):
             category_count[category] = 0
         category_count[category] += 1
 
+        '''
+        for feature in features.keys():
+            if not feature_count.has_key(feature):
+                feature_count[feature] = 0
+            feature_count[features] += features[feature]
+        '''
     brand_tags = sort_and_filter(brand_count,5)
     category_tags = sort_and_filter(category_count,5)
+    '''
+    feature_tags = sort_and_filter(feature_count,10)
+    '''
     feature_tags = []
-    return [brand_tags,category_tags,feature_tags]
+    return (brand_tags,category_tags,feature_tags)
 
 
 def itemlis(contents):
     res_lis = []
     for item in contents:
         item = json.loads(item)
-        res_lis.append((item["imgurl"],"http://www.baidu.com",item["title"]))
+        res_lis.append((item["imgurl"],item["url"],item["title"]))
     return res_lis
 
 
