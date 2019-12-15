@@ -66,12 +66,11 @@ def read_results(scoreDocs, searcher):
 
         # 商品评价tag
         itemfeat = dict()
-        featseg = re.split('\n|\r',doc.get("tag"))
+        featseg = re.split(' ',doc.get("tag"))
         for feat in featseg:
             featureseg = feat.split('\t')
             if (len(featureseg)>1):
                 itemfeat[featureseg[0].strip()]=featureseg[1]
-        print (itemfeat)
         item['feature'] = itemfeat
         res_lis.append(json.dumps(item))
     return res_lis
