@@ -69,7 +69,7 @@ def read_results(scoreDocs, searcher):
         for feat in featseg:
             featureseg = feat.split('\t')
             if (len(featureseg)>1):
-                itemfeat[featureseg[0].decode('utf-8')]=featureseg[1]
+                itemfeat[featureseg[0].strip()]=featureseg[1]
         print (itemfeat)
         item['feature'] = itemfeat
         res_lis.append(json.dumps(item))
@@ -162,12 +162,13 @@ def match_item(item,categorys,features,brands):
     return True
 
 def match_item_feature(item,properties,property_name):
+    # 与其他属性不同，特色取交集
     if (not properties):
         return True
     for proper in properties:
-        if proper in item[property_name].keys():
-            return True
-    return False
+        if proper not in item[property_name].keys():
+            return False
+    return True
 
 def match_item_one(item,properties,property_name):
     if (not properties):
@@ -216,7 +217,17 @@ def itemlis(contents):
         item = json.loads(item)
         res_lis.append((item["imgurl"],item["url"],item["title"]))
     return res_lis
+'''
+item
+0 - imgurl
+1 - url
+2 - title
+3 - property
 
+
+
+
+'''
 
 
 
