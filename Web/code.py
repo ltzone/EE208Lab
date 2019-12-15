@@ -53,10 +53,10 @@ class logoidx:
 
         kw = logo_recognition("static/userupload/tmp")
         vm_env.attachCurrentThread()
-        filtertags = total(contents)
         contents = search_command(kw,'relativity'.decode('utf-8'))
+        filtertags = total(contents)
         results = itemlis(contents)
-        return render.result(kw, method, results, filtertags) # a demo for the input image
+        return render.result(kw, 'relativity', results, filtertags) # a demo for the input image
 
 class search:
     def GET(self):
@@ -77,10 +77,11 @@ class filter:
         category = web.input(category=[]).category
         features = web.input(feature=[]).feature
         brand = web.input(brand=[]).brand
+        source = web.input(source=[]).source
         vm_env.attachCurrentThread()
         contents = search_command(kw,method) # 搜索结果
         filtertags = total(contents) # 统计品牌、属性、特色的结果，即显示在页面左侧所必须的内容
-        filtered_contents = tag_filter(contents,category,features,brand)
+        filtered_contents = tag_filter(contents,category,features,brand,source)
                                      # 对搜索结果作筛选
         results = itemlis(filtered_contents) # 根据筛选结果提取出要显示在页面右侧的所必需的内容
         return render.result(kw, method, results, filtertags)
