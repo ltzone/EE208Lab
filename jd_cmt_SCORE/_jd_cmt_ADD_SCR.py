@@ -45,9 +45,7 @@ def crawl_jd_cmt_SCORE(prdtId=100009691096):# change for url
         r"productPageComments.action?callback=fetchJSON_comment98vv1279&" \
         r"productId=%s&" \
         r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1"%prdtId
-    comment_tag_path = r'C:\TC-prog\JetBrain_pycharm_TC' \
-                       r'\PycharmProjects\Crawler_EEFinal' \
-                       r'\jd_cmt_SCORE\httpsitem.jd.com%s.html.txt'%prdtId
+    comment_tag_path = r'result\httpsitem.jd.com%s.html.txt'%prdtId
 
     try:
         r=requests.get(url,headers=headers,timeout=5)
