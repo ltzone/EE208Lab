@@ -273,13 +273,6 @@ while len(pages):
         if not p.match(str(page)):
             continue
 
-        count += 1
-        print count
-        print page
-        set_in(page)
-
-        time.sleep(5)
-
         # price
         try:
             br.download(page)
@@ -290,6 +283,14 @@ while len(pages):
         except:
             price = ' '
             print "price error"
+            continue
+
+        count += 1
+        print count
+        print page
+        set_in(page)
+
+        time.sleep(5)
 
         data = get_data(content,page,price)
         add_page_to_folder(page,data)
