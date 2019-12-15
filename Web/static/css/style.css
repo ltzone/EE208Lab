@@ -38,11 +38,12 @@ body {
 {
 	padding-left: 0%;
 	padding-right: 0%;
+	margin-right: 5%;
 }
 
 .result_contents .img-responsive
 {
-	height: 200px;
+	height: 300px;
 }
 
 .weburl
