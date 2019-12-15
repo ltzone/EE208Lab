@@ -207,7 +207,7 @@ if __name__ == '__main__':
         base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
         IndexFiles(sys.argv[1], os.path.join(base_dir, INDEX_DIR),
                    StandardAnalyzer(Version.LUCENE_CURRENT))
-                   """
+        """
         analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
         IndexFiles('index.txt', "index", "index1", analyzer)
         end = datetime.now()

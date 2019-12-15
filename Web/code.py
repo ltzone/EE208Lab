@@ -53,10 +53,10 @@ class logoidx:
 
         kw = logo_recognition("static/userupload/tmp")
         vm_env.attachCurrentThread()
-        filtertags = total(contents)
         contents = search_command(kw,'relativity'.decode('utf-8'))
+        filtertags = total(contents)
         results = itemlis(contents)
-        return render.result(kw, method, results, filtertags) # a demo for the input image
+        return render.result(kw, 'relativity', results, filtertags) # a demo for the input image
 
 class search:
     def GET(self):

@@ -44,7 +44,7 @@ def read_results(scoreDocs, searcher):
         doc = searcher.doc(scoreDoc.doc)
         item = dict()
         item['imgurl'] = doc.get("imgurl").strip()
-    #    item['url'] = doc.get("url").strip()
+    #   item['url'] = doc.get("url").strip()
         item['title'] = doc.get("title")
         item['brand'] = doc.get("brand")
         item['price'] = doc.get("price")
