@@ -1,4 +1,8 @@
-import json, math
+# -*- coding: utf-8 -*-
+import math
+from threading import Thread
+import queue
+import json
 import os , sys
 #导入requests库(请求和页面抓取)
 import requests
@@ -21,32 +25,28 @@ import jieba as jb
 #导入结巴分词(关键词提取)
 import jieba.analyse
 
-
+f=open("index_sn.txt", 'r')
 
 #设置请求中头文件的信息
 headers = {'User-Agent':'Mozilla/5.0 '
                         '(Windows NT 10.0; Win64; x64) '
                         'AppleWebKit/537.36 (KHTML,'
                         ' like Gecko) Chrome/76.0.3809.132 '
-                        'Safari/537.36',
-'Accept':'text/html;q=0.9,*/*;q=0.8',
-'Accept-Charset':'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-#"Accept-Language": "zh-CN,zh;q=0.9",
-'Connection':'close',
-'Referer':'https://www.jd.com/'
-}
+                        'Safari/537.36'}
 
-
+q = queue.Queue()
+NUM = 5
+JOBS = 10
 #cookies=***
-def crawl_jd_cmt_tag(prdtId=100009691096):# change for url
+def crawl_sn_cmt_tag(sku, shop):# change for url
 
-    url=r"https://sclub.jd.com/comment/" \
-        r"productPageComments.action?callback=fetchJSON_comment98vv1279&" \
-        r"productId=%s&" \
-        r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1"%prdtId
+    url=r"https://review.suning.com/ajax/" \
+        r"getClusterReview_labels/cluster-33667504-0000000" \
+        r"{}-{}" \
+        r"-----commodityrLabels.htm?".format(sku,shop)
     comment_tag_path = r'C:\TC-prog\JetBrain_pycharm_TC' \
                        r'\PycharmProjects\Crawler_EEFinal' \
-                       r'\suning_cmt_ALL\httpitem.jd.com%s.html.txt'%prdtId
+                       r'\sn_cmt_tags\httpproduct.suning.com{}{}.html.txt'.format(sku,shop)
 
     try:
         r=requests.get(url,headers=headers,timeout=5)
@@ -61,59 +61,67 @@ def crawl_jd_cmt_tag(prdtId=100009691096):# change for url
             pos = i
     try:
         # data0 = re.sub(u'^fetchJSON_comment98vv106813\(', '', html)
-        r_json_str = r.text[pos + 1:-2]
+        r_json_str = r.text[pos + 1:-1]
         # print (r_json_str)
-        r_json_obj=json.loads(r_json_str,strict=False)
+        r_json_obj=json.loads(r_json_str,strict=False)# 转成python对象
         print (r_json_obj)
-        r_json_tags=r_json_obj['hotCommentTagStatistics']
-        r_json_Sum = r_json_obj['productCommentSummary']
-        print ('狗东评论标签：')
+        r_json_tags=r_json_obj['commodityLabelCountList']# 找到描述标签和个数的内容
+        #print ('苏宁评论标签：')
         # 追加模式，逐行写入
-        with open(comment_tag_path, 'w') as file:
-            sumcmt=r_json_Sum['commentCount']
-            rate=r_json_Sum['goodRateShow'] # 好评率*100
-            #good=r_json_Sum['goodCount'] # 好评数
-            #gen =r_json_Sum['generalCount'] # 中评数
-            #poor=r_json_Sum['poorCount'] # 差评数
-            video =r_json_Sum['videoCount']
-            after =r_json_Sum['afterCount']
-
-            score=int(rate*0.7+math.log10(sumcmt)*5+
-                          ((after+video)*1.0)/sumcmt/0.05)
-            file.write("httpitem.jd.com"+str(prdtId) +".html"
-                       + '\t' + str(score) + '\n')
-            print("httpsitem.jd.com"+str(prdtId) +".html"
-                       + '\t' + str(score))
 
         for r_json_tag in r_json_tags:
             with open(comment_tag_path,'a+') as file:
-                file.write(r_json_tag['name']+'\t'+str(r_json_tag['count'])+'\n')
-                print(r_json_tag['name']+'\t'+str(r_json_tag['count']))
+                file.write(r_json_tag['labelName']+
+                           '\t'+str(r_json_tag['labelCnt'])+'\n')
+                print(r_json_tag['labelName']+
+                      '\t'+str(r_json_tag['labelCnt']))
     except:
         print('large json')
 
 
-if __name__ == '__main__':
-
-    with open("index_sn.txt",'r') as f:
-        for line in f.readlines():
+def run():
+    global f
+    for line in f.readlines():
+        try:
             pp = line.split('\t')
             webpage = pp[1].strip('\n')
-            print (webpage)
-            temp=webpage[19:-9]
-            pos=0
+            print(webpage)
+            temp = webpage[16:-9]
+            if (len(webpage) > 60):
+                continue
+            pos = 0
             for i in range(len(temp)):
                 if temp[i] == 'm':
                     pos = i
-            ID=temp[pos+1:]
-            itemID=ID[10:]
-            print(itemID)
-            if(len(webpage)>50 and len(webpage)<54):
-                continue
-            print (itemID)
-            try:
-                itemID=int(itemID)
-                crawl_jd_cmt_tag(itemID)
-                time.sleep(random.random() * 3)
-            except:
-                print("Invalid Input!")
+            itemID = temp[pos + 1:]
+            # print(itemID)
+            # print(type(itemID))
+            if (len(itemID) != 21): continue
+            shop = itemID[:-11]
+            sku = itemID[10:]
+            print(shop, sku)
+
+            crawl_sn_cmt_tag(sku, shop)
+            time.sleep(random.random() * 2)
+        except:
+            print("Invalid Input!")
+
+
+def working():
+    while True:
+        #arguments = q.get()
+        run()
+        q.task_done()
+
+
+#fork NUM个线程等待队列
+for i in range(NUM):
+    t = Thread(target=working)
+    t.setDaemon(True)
+    t.start()
+#把JOBS排入队列
+for i in range(JOBS):
+    q.put(i)
+#阻塞，等待所有JOBS完成
+q.join()
+f.close()
