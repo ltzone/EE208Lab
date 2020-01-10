@@ -1,11 +1,14 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+
 import sys
+import os
 import urllib2
 from bs4 import BeautifulSoup
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
+ccc = 0
 def getTitle(url):
     try:
         url1= urllib2.urlopen(url).read()
@@ -20,7 +23,7 @@ def getTitle(url):
 #dict1 = {}
 
 def parse(url,content):
-
+    global ccc
     # imgurl
     soup = BeautifulSoup(content,features='html.parser')
     for img in soup.find_all('img', id="spec-img"):
@@ -28,9 +31,10 @@ def parse(url,content):
         if (src == '' or not (src.endswith('jpg') or src.endswith('png'))):
             continue
         src = 'http:' + src
-        with open(url + '.txt', 'a') as f:
-            f.write(src)
-            f.write('\n')
+        with open(url + '.txt', 'a') as f3:
+            f3.write(src)
+            print src
+            f3.write('\n')
 
 
     # other
@@ -38,53 +42,66 @@ def parse(url,content):
         full = k.get_text()
 
         # name
-        url2 = 'https://p.3.cn/prices/mgets?skuIds=J_' + str(k.contents[3].get('title'))
-        c = str(str(full)[1:-1])
-        c1=c.split('\n')
-        c2=c1[0].split("：")
-        with open(url + '.txt', 'a') as f:
-            f.write(c2[1])
-            f.write('\n')
-        #dict1[c2[0]]=c2[1]
+        try:
+            url2 = 'https://p.3.cn/prices/mgets?skuIds=J_' + str(k.contents[3].get('title'))
+            c = str(str(full)[1:-1])
 
-        # brand
-        for k in soup.find_all('a', {'clstag': 'shangpin|keycount|product|pinpai_1'}):
-            brand = k.get_text()
-            #dict1['brand'] = brand
+            c1=c.split('\n')
+            c2=c1[0].split("：")
+            #print  full,'\n',c,'\n',c1,'\n',c2
             with open(url + '.txt', 'a') as f:
-                f.write(brand)
-                f.write('\n')
-
-        # price
-        request2 = urllib2.Request(url2)
-        response2 = urllib2.urlopen(request2)
-        content2 = response2.read()
-        a = content2.find('\"p\":\"')
-        b = content2.find('\"}]')
-        #dict1['price'] = content2[a + 5:b]
-        with open(url + '.txt', 'a') as f:
-            f.write(content2[a + 5:b])
-            f.write('\n')
-
-        # attribute
-        for k in soup.find_all('a', {'clstag': 'shangpin|keycount|product|mbNav-3'}):
-            item = k.get_text()
-            #dict1['type'] = item
-            with open(url + '.txt', 'a') as f:
-                f.write(item)
-                f.write('\n')
-
-        # other information
-        with open(url + '.txt', 'a') as f:
-            for i in c1[1:-1]:
-
-                c2=i.split("：")
-
-                f.write(c2[0])
-                f.write(':')
                 f.write(c2[1])
-                f.write('\t')
-                #dict1[c2[0]]=c2[1]
+                print c2[1]
+                f.write('\n')
+            #dict1[c2[0]]=c2[1]
+
+            # brand
+            for k in soup.find_all('a', {'clstag': 'shangpin|keycount|product|pinpai_1'}):
+                brand = k.get_text()
+                #dict1['brand'] = brand
+                with open(url + '.txt', 'a') as f:
+                    f.write(brand)
+                    print brand
+                    f.write('\n')
+
+            # price
+            request2 = urllib2.Request(url2)
+            response2 = urllib2.urlopen(request2)
+            content2 = response2.read()
+            a = content2.find('\"p\":\"')
+
+            content2=content2[a+5:]
+            b = content2.find('\"')
+            #dict1['price'] = content2[a + 5:b]
+            with open(url + '.txt', 'a') as f:
+                f.write(content2[:b])
+                print content2[:b]
+                f.write('\n')
+
+            # attribute
+            for k in soup.find_all('a', {'clstag': 'shangpin|keycount|product|mbNav-3'}):
+                item = k.get_text()
+                #dict1['type'] = item
+                with open(url + '.txt', 'a') as f:
+                    f.write(item)
+                    print item
+                    f.write('\n')
+
+            # other information
+            with open(url + '.txt', 'a') as f:
+                for i in c1[1:-1]:
+
+                    c2=i.split("：")
+
+                    f.write(c2[0])
+                    f.write(':')
+                    f.write(c2[1])
+                    f.write('\t')
+                ccc+=1
+                print 'No.',ccc,'\n'
+        except:
+            pass
+                    #dict1[c2[0]]=c2[1]
 
 
 
@@ -99,24 +116,32 @@ def valid_filename(s):
 def getdetail(url):
     filename = valid_filename(url)
     #dict1['title'] = getTitle(url)
-    with open(filename + '.txt', 'w') as f:
+    with open( filename + '.txt', 'w') as f:
         f.write(getTitle(url))
         f.write('\n')
         f.write(url)
         f.write('\n')
         f.close()
     content = urllib2.urlopen(url).read()
-    parsejingdong(filename, content)
+    parse(filename, content)
 
 
 def main():
     #getdetail('https://item.jd.com/37313139007.html')
-    f = open("Fi-index.txt")
+    f = open("NEW_available_idx.txt")
     line = f.readline()
     while line:
-        url=line.split('\t') [0]
-        print url
-        getdetail(url)
+        url=line.strip().split('\t') [0]
+        url2 = line.strip().split('\t')[1]
+
+        path1 = "new/detail/" + valid_filename(url) + '.txt'
+        path2 = "new/comment/" + url2 + "_.txt"
+
+        print path1,os.path.exists(path1)
+        print path2,(os.path.exists(path2))
+        if ((not os.path.exists(path1)) and ( os.path.exists(path2)) ):
+            print url
+            getdetail(url)
         line = f.readline()
 
 
