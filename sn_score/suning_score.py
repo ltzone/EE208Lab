@@ -39,14 +39,15 @@ NUM = 5
 JOBS = 10
 #cookies=***
 def crawl_sn_cmt_tag(sku, shop):# change for url
-
+#https://review.suning.com/ajax/review_count/cluster-32762695-
+# 000000011373116603-0000000000-----satisfy.htm?callback=satisfy
     url=r"https://review.suning.com/ajax/" \
-        r"getClusterReview_labels/cluster-33667504-0000000" \
+        r"review_count/cluster-32762695-0000000" \
         r"{}-{}" \
-        r"-----commodityrLabels.htm?".format(sku,shop)
+        r"-----satisfy.htm?".format(sku,shop)
     comment_tag_path = r'C:\TC-prog\JetBrain_pycharm_TC' \
                        r'\PycharmProjects\Crawler_EEFinal' \
-                       r'\sn_cmt_tags\httpproduct.suning.com{}{}.html.txt'.format(sku,shop)
+                       r'\sn_cmt_SCORE\httpproduct.suning.com{}{}.html.txt'.format(sku,shop)
 
     try:
         r=requests.get(url,headers=headers,timeout=5)
@@ -59,22 +60,30 @@ def crawl_sn_cmt_tag(sku, shop):# change for url
     for i in range(len(raw)):
         if raw[i] == '(':
             pos = i
+
+
     try:
         # data0 = re.sub(u'^fetchJSON_comment98vv106813\(', '', html)
         r_json_str = r.text[pos + 1:-1]
         # print (r_json_str)
-        r_json_obj=json.loads(r_json_str,strict=False)# 转成python对象
-        print (r_json_obj)
-        r_json_tags=r_json_obj['commodityLabelCountList']# 找到描述标签和个数的内容
-        #print ('苏宁评论标签：')
+        r_json_obj = json.loads(r_json_str, strict=False)  # 转成python对象
+        print(r_json_obj)
+        r_json_dict = r_json_obj['reviewCounts'][0]  # 好评中评差评等的统计
+        # print ('苏宁评论标签：')
         # 追加模式，逐行写入
 
-        for r_json_tag in r_json_tags:
-            with open(comment_tag_path,'a+') as file:
-                file.write(r_json_tag['labelName']+
-                           '\t'+str(r_json_tag['labelCnt'])+'\n')
-                print(r_json_tag['labelName']+
-                      '\t'+str(r_json_tag['labelCnt']))
+        with open(comment_tag_path, 'w') as file:
+            sumcmt = int(r_json_dict['totalCount'])
+            good = int(r_json_dict['fiveStarCount'])  # 好评数
+            # gen =r_json_dict['fourStarCount'] # 中评数
+            # poor=r_json_dict['oneStarCount'] # 差评
+            after = int(r_json_dict['againCount'])
+            # print(good, sumcmt, after)
+            # print(good/sumcmt)
+            score = int((1.0 * good / sumcmt * 0.8 + (after * 1.0) / sumcmt*15) * 100)
+
+            file.write("httpproduct.suning.com" + shop + sku + ".html" + '\t' + str(score) + '\n')
+            print(shop + sku + '\t' + str(score))
     except:
         print('large json')
 
