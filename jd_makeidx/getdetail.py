@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import sys
+import os
 import urllib2
 from bs4 import BeautifulSoup
 reload(sys)
@@ -115,7 +116,7 @@ def valid_filename(s):
 def getdetail(url):
     filename = valid_filename(url)
     #dict1['title'] = getTitle(url)
-    with open(filename + '.txt', 'w') as f:
+    with open( filename + '.txt', 'w') as f:
         f.write(getTitle(url))
         f.write('\n')
         f.write(url)
@@ -130,9 +131,17 @@ def main():
     f = open("NEW_available_idx.txt")
     line = f.readline()
     while line:
-        url=line.split('\t') [0]
-        print url
-        getdetail(url)
+        url=line.strip().split('\t') [0]
+        url2 = line.strip().split('\t')[1]
+
+        path1 = "new/detail/" + valid_filename(url) + '.txt'
+        path2 = "new/comment/" + url2 + "_.txt"
+
+        print path1,os.path.exists(path1)
+        print path2,(os.path.exists(path2))
+        if ((not os.path.exists(path1)) and ( os.path.exists(path2)) ):
+            print url
+            getdetail(url)
         line = f.readline()
 
 

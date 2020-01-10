@@ -58,7 +58,7 @@ def getTitle(url):
             raise  # Not error we are looking for
         pass  # Handle error here.
 
-
+num = 0
 class IndexFiles(object):
     """Usage: python IndexFiles <doc_directory>"""
 
@@ -91,12 +91,19 @@ class IndexFiles(object):
             return
 
     def indexDocs(self, dialog,root, writer):
+        global num
 
         t3 = FieldType()
         t3.setIndexed(False)
         t3.setStored(True)
         t3.setTokenized(False)
         t3.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS)
+
+        t4 = FieldType()
+        t4.setIndexed(True)
+        t4.setStored(True)
+        t4.setTokenized(False)
+        t4.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS)
 
         t1 = FieldType()
         t1.setIndexed(True)
@@ -130,62 +137,84 @@ class IndexFiles(object):
                 fn =list(filename)
                 fn.insert(4,'s')
                 #filename2=''.join(fn)
-                path2="index/tag/" + filename2 + ".txt"
-                path = os.path.join(root, filename+".txt")
+                path2="new/comment/" + filename2 + "_.txt"
+                path3="new/score/" + filename2 + ".txt"
+                path = "new/detail/"+ filename + ".txt"
+                print path,path2,path3
+                if (os.path.exists(path) and os.path.exists(path3) ):
+                    f1 = open(path)
+                    ff2 = open(path2)
 
-                f1 = open(path)
-                ff2 = open(path2)
-                ll=[]
-                line = f1.readline()
-                while line:
-                    if (line[-1] == '\n'):
-                        ll.append(line[:-1])
-                    else:
-                        ll.append(line)
-
+                    ll=[]
                     line = f1.readline()
-
-                if (len(ll) == 8):
-                    ll2 = []
-                    line = ff2.readline()
                     while line:
                         if (line[-1] == '\n'):
-                            ll2.append(line[:-1])
+                            ll.append(line[:-1])
                         else:
+                            ll.append(line)
+
+                        line = f1.readline()
+                    #print(os.path.exists(path3) and len(ll) == 8)
+                    if(len(ll) == 8):
+
+                        ll2 = []
+                        line = ff2.readline()
+                        while line:
+                            line=line.strip()
                             ll2.append(line)
 
-                        line = ff2.readline()
-                    tag = ' '.join(ll2)
-                    print tag,'\n','\n'
-                    doc = Document()
 
-                    if (len(ll) > 0) :
+                            line = ff2.readline()
+                        tag = ' '.join(ll2)
+                        print tag,'\n'
 
-                        pricee = long(100*float(ll[5]))
+                        ff3 = open(path3)
+                        line = ff3.readline().strip()
+                        score = int(line.split('\t')[1])
+                        print score, '\n'
+                        doc = Document()
 
-                        print pricee
-                        doc.add(Field('url', url, t3))
-                        doc.add(LongField('price',pricee,Field.Store.YES))
-                        print 'add price', int(100*float(ll[5])),'\n'
-                        doc.add(Field('path', path, t3))
-                        print 'add path', path, '\n'
-                        doc.add(Field('imgurl', ll[2], t3))
-                        print 'add imgurl', ll[2], '\n'
-                        doc.add(Field('title', ll[0], t1))
-                        print 'add title', ll[0], '\n'
-                        doc.add(Field('name', ll[3], t3))
-                        print 'add name', ll[3], '\n'
-                        doc.add(Field("brand", ll[4], t3))
-                        print 'add brand', ll[4], '\n'
-                        doc.add(Field("attribute", ll[6], t3))
-                        print 'add attribute', ll[6], '\n'
-                        doc.add(Field("detail", ll[7], t3))
-                        print 'add detail', ll[7], '\n'
-                        doc.add(Field("tag", tag, t3))
-                        print 'add tag', tag, '\n'
+                        if (len(ll) > 0) :
+
+                            pricee = long(100*float(ll[5]))
+                            scoree = long(score)
+                            print pricee,scoree,'\n'
+                            doc.add(Field('url', url.strip(), t4))
+                            doc.add(LongField('price',pricee,Field.Store.YES))
+                            print 'add price', int(100*float(ll[5])),'\n'
+                            doc.add(LongField('score', scoree, Field.Store.YES))
+                            print 'add score', scoree, '\n'
+                            doc.add(Field('path', path, t3))
+                            print 'add path', path, '\n'
+                            doc.add(Field('imgurl', ll[2], t3))
+                            print 'add imgurl', ll[2], '\n'
+                            doc.add(Field('title', ll[0], t1))
+                            print 'add title', analysis(ll[0]), '\n'
+                            doc.add(Field('name', ll[3], t3))
+                            print 'add name', ll[3], '\n'
+                            doc.add(Field("brand", ll[4], t3))
+                            print 'add brand', ll[4], '\n'
+                            doc.add(Field("attribute", ll[6], t3))
+                            print 'add attribute', ll[6], '\n'
+                            doc.add(Field("detail", ll[7], t3))
+                            print 'add detail', ll[7], '\n'
+                            doc.add(Field("tag", tag, t3))
+                            print 'add tag', tag, '\n'
+                            doc.add(Field("website","京东",t3))
+                            print 'add website',"京东",'\n'
+                            num += 1
+                            print num
+                            with open('idx.txt', 'a') as f:
+                                f.write(url)
+                                f.write('\t')
+                                f.write(ll[2])
+                                f.write('\n')
+                                f.close()
                     else:
                         print "warning: no content in %s" % filename
                     writer.addDocument(doc)
+                else:
+                    print "no file"
             except :#SocketError as e:
                     #if e.errno != errno.ECONNRESET:
                     #    raise  # Not error we are looking for
@@ -209,7 +238,7 @@ if __name__ == '__main__':
                    StandardAnalyzer(Version.LUCENE_CURRENT))
         """
         analyzer = SimpleAnalyzer(Version.LUCENE_CURRENT)
-        IndexFiles('index.txt', "index", "index1", analyzer)
+        IndexFiles('cmtidx.txt', "new/detail", "index", analyzer)
         end = datetime.now()
         print end - start
     except Exception, e:
