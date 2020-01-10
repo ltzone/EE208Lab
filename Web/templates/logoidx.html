@@ -19,14 +19,25 @@
 		<div class="row">
 			<div class=".col-md-4 .col-md-offset-4" id="idx">
 				<h1>Search Engine</h1>
-				<form  style="padding-bottom:10px;width: 400px;padding: auto;"
-					   class="form-group" enctype="multipart/form-data" method="POST" action="/pictsearch">
-                    <input type="file" id="input_img" name="input_img">
-					<button type="submit" class="btn btn-default" id="Search" name="Search">搜索</button>
-				</form>
-
-
-
+				<div style="padding-bottom:10px; width:400px;text-align: left; margin: auto;">
+					<form class="form-group" enctype="multipart/form-data" method="POST" action="/pictsearch">
+						<label for="input_img">File input</label>
+	                    <input type="file" id="input_img" name="input_img">
+						<div class="radio">
+						  <label>
+						    <input type="radio" name="method" value="logo" checked>
+						    Logo Match
+						  </label>
+						</div>
+						<div class="radio">
+						  <label>
+						    <input type="radio" name="method" value="pict">
+						    Accurate Match
+						  </label>
+						</div>
+						<button type="submit" class="btn btn-default" id="Search" name="Search">搜索</button>
+					</form>
+				</div>
 
                 <form class="form-inline" style = "padding-bottom:10px" method="GET">
    				    <button type="submit" class="btn btn-primary" formaction="/" method="GET">Normal Search</button>

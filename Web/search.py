@@ -10,7 +10,7 @@ import json
 
 from java.io import File
 from org.apache.lucene.analysis.core import SimpleAnalyzer
-from org.apache.lucene.index import DirectoryReader
+from org.apache.lucene.index import DirectoryReader, Term
 from org.apache.lucene.queryparser.classic import QueryParser
 from org.apache.lucene.store import SimpleFSDirectory
 from org.apache.lucene.search import IndexSearcher
@@ -19,6 +19,7 @@ from org.apache.lucene.search import BooleanQuery
 from org.apache.lucene.search import BooleanClause
 from org.apache.lucene.search import Sort
 from org.apache.lucene.search import SortField
+from org.apache.lucene.search import TermQuery
 import jieba
 import re
 
@@ -233,6 +234,22 @@ item
 
 '''
 
+def match_pict(img):
+    pass
+
+def pict_search(img):
+    #urls = match_pict(img)
+    STORE_DIR = "FINDEX"
+    directory = SimpleFSDirectory(File(STORE_DIR))
+    searcher = IndexSearcher(DirectoryReader.open(directory))
+    urls = ["http://item.jd.com/59883828898.html"]
+    res_lis = []
+    for url in urls:
+        query = TermQuery(Term("url",url))
+        scoreDocs = searcher.search(query, 1).scoreDocs
+        res_lis += read_results(scoreDocs,searcher)
+    return res_lis
+ 
 
 
 if __name__ == '__main__':

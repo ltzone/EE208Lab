@@ -6,7 +6,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-from search import search_command, total, tag_filter, itemlis
+from search import search_command, total, tag_filter, itemlis, pict_search
 from logo_sift import logo_recognition
 
 
@@ -61,7 +61,11 @@ class pictsearch:
             results = itemlis(contents)
             return render.result(kw, 'relativity', results, filtertags)
         else:
-            pass
+            vm_env.attachCurrentThread()
+            contents = pict_search("static/userupload/tmp")
+            filtertags = total(contents)
+            results = itemlis(contents)
+            return render.result('LSH Match', 'relativity', results, filtertags)
 
 class search:
     def GET(self):
