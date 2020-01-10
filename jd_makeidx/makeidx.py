@@ -188,7 +188,7 @@ class IndexFiles(object):
                             print 'add path', path, '\n'
                             doc.add(Field('imgurl', ll[2], t3))
                             print 'add imgurl', ll[2], '\n'
-                            doc.add(Field('title', ll[0], t1))
+                            doc.add(Field('title', analysis(ll[0]), t1))
                             print 'add title', analysis(ll[0]), '\n'
                             doc.add(Field('name', ll[3], t3))
                             print 'add name', ll[3], '\n'

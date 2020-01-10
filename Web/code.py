@@ -6,7 +6,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-from search import search_command, total, tag_filter, itemlis
+from search import search_command, total, tag_filter, itemlis, pict_search
 from logo_sift import logo_recognition
 
 
@@ -23,6 +23,7 @@ urls = (
     '/moreidx', 'moreidx',
     '/logoidx', 'logoidx',
     '/filter', 'filter',
+    '/pictsearch', 'pictsearch',
 )
 
 
@@ -41,6 +42,8 @@ class moreidx:
 class logoidx:
     def GET(self):
         return render.logoidx()
+
+class pictsearch:
     def POST(self):
         x = web.input(input_img={})
         filedir = 'static/userupload'
@@ -50,13 +53,19 @@ class logoidx:
             fout.write(x.input_img.file.read())
             # writes the uploaded file to the newly created file.
             fout.close()  # closes the file, upload complete.
-
-        kw = logo_recognition("static/userupload/tmp")
-        vm_env.attachCurrentThread()
-        contents = search_command(kw,'relativity'.decode('utf-8'))
-        filtertags = total(contents)
-        results = itemlis(contents)
-        return render.result(kw, 'relativity', results, filtertags) # a demo for the input image
+        if web.input().method == 'logo':
+            kw = logo_recognition("static/userupload/tmp")
+            vm_env.attachCurrentThread()
+            contents = search_command(kw,'relativity'.decode('utf-8'))
+            filtertags = total(contents)
+            results = itemlis(contents)
+            return render.result(kw, 'relativity', results, filtertags)
+        else:
+            vm_env.attachCurrentThread()
+            contents = pict_search("static/userupload/tmp")
+            filtertags = total(contents)
+            results = itemlis(contents)
+            return render.result('LSH Match', 'relativity', results, filtertags)
 
 class search:
     def GET(self):
