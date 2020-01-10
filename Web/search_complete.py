@@ -17,10 +17,7 @@ from org.apache.lucene.search import IndexSearcher
 from org.apache.lucene.util import Version
 from org.apache.lucene.search import BooleanQuery
 from org.apache.lucene.search import BooleanClause
-from org.apache.lucene.search import Sort
-from org.apache.lucene.search import SortField
 import jieba
-import re
 
 
 
@@ -47,61 +44,56 @@ def read_results(scoreDocs, searcher):
         doc = searcher.doc(scoreDoc.doc)
         item = dict()
         item['imgurl'] = doc.get("imgurl").strip()
-        item['url'] = doc.get("url").strip()
+    #   item['url'] = doc.get("url").strip()
         item['title'] = doc.get("title")
         item['brand'] = doc.get("brand")
         item['price'] = doc.get("price")
-        item['rank'] = doc.get("score")
+        item['rank'] = doc.get("rank")
         item['category'] = doc.get("attribute")
-        item['source'] = doc.get("website")
-
-        # 商品具体属性
-        itemdet = dict()
-        detseg = doc.get("detail").split('\t')
-        for detail in detseg:
-            detailseg = detail.split(':')
-            if len(detail)>1:
-                itemdet[detailseg[0]]=detailseg[1]
-        item['detail'] = itemdet
-
-        # 商品评价tag
+        '''
+        itemattr = dict()
+        attrseg = doc.get("attribute").split(' ')
+        for attr in attrseg:
+            attrseg = attr.split(':')
+            itemattr[attrseg[0]]=attrseg[1]
+        item['attribute'] = itemattr
         itemfeat = dict()
-        featseg = re.split(' ',doc.get("tag"))
+        featseg = doc.get("feature").split(' ')
         for feat in featseg:
-            featureseg = feat.split('\t')
-            if (len(featureseg)>1):
-                itemfeat[featureseg[0].strip()]=featureseg[1]
+            featseg = feat.split(':')
+            featattr[featseg[0]]=featseg[1]
         item['feature'] = itemfeat
+        '''
         res_lis.append(json.dumps(item))
     return res_lis
 
 def highprice_search(searcher, analyzer, command):
     # 按价格降序排序
-    highprice_sorter = Sort(SortField("price",SortField.Type.LONG,True))
+    highprice_sorter = Sort(SortField("price",SortField.LONG,True))
     seg_list = jieba.cut(command)
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
                         analyzer).parse(command)
-    scoreDocs = searcher.search(query, 50, highprice_sorter).scoreDocs
+    scoreDocs = searcher.search(query, 50, highprice_sorter)
     return read_results(scoreDocs,searcher)
 
 def lowprice_search(searcher, analyzer, command):
     # 按价格升序排序
-    lowprice_sorter = Sort(SortField("price",SortField.Type.LONG))
+    lowprice_sorter = Sort(SortField("price",SortField.LONG))
     seg_list = jieba.cut(command)
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
                         analyzer).parse(command)
-    scoreDocs = searcher.search(query, 50, lowprice_sorter).scoreDocs
+    scoreDocs = searcher.search(query, 50, lowprice_sorter)
     return read_results(scoreDocs,searcher)
 
 def rank_search(searcher, analyzer, command):
-    rank_sorter = Sort(SortField("score",SortField.Type.LONG,True))
+    rank_sorter = Sort(SortField("rank",SortField.LONG))
     seg_list = jieba.cut(command)
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
                         analyzer).parse(command)
-    scoreDocs = searcher.search(query, 50, rank_sorter).scoreDocs
+    scoreDocs = searcher.search(query, 50, rank_sorter)
     return read_results(scoreDocs,searcher)
 
 def relativity_search(searcher, analyzer, command):
@@ -132,8 +124,7 @@ dict {
     brand
     price
     rank
-    category
-    detail {
+    attr {
         text: text
         ...
     }
@@ -144,45 +135,34 @@ dict {
 }
 '''
 
-def tag_filter(contents,categorys,features,brand,source):
+def tag_filter(contents,categorys,features,brands):
     results = list()
     for item in contents:
-        item2 = json.loads(item)
-        if match_item(item2,categorys,features,brand,source):
+        item = json.loads(item)
+        if match_item(item,categorys,features,brands):
             results.append(item)
     return results
 
-def match_item(item,categorys,features,brands,sources):
+def match_item(item,categorys,features,brands):
     if not match_item_one(item,categorys,'category'):
         return False
-    if not match_item_feature(item,features,'feature'):
+    if not match_item_one(item,features,'feature'):
         return False
     if not match_item_one(item,brands,'brand'):
         return False
-    if not match_item_one(item,sources,'source'):
-        return False
-    return True
-
-def match_item_feature(item,properties,property_name):
-    # 与其他属性不同，特色取交集
-    if (not properties):
-        return True
-    for proper in properties:
-        if proper not in item[property_name].keys():
-            return False
     return True
 
 def match_item_one(item,properties,property_name):
     if (not properties):
-        return True
-    for proper in properties:
-        if proper == item[property_name]:
-            return True
+        for proper in properties:
+            if proper in item[property_name].keys():
+                return True
     return False
+
 
 def sort_and_filter(x_count,length):
     x_tuple = zip(x_count.keys(),x_count.values())
-    x_sorted = sorted(x_tuple,key = lambda kv:(-kv[1], kv[0]))
+    x_sorted = sorted(x_tuple)
     filtered_x = x_sorted[:length]
     return filtered_x
 
@@ -191,47 +171,42 @@ def total(contents):
     brand_count = dict()
     category_count = dict()
     feature_count = dict()
-    source_count = dict()
     for item in contents:
         item = json.loads(item)
         brand = item['brand']
         category = item['category']
-        feature = item['feature']
-        source = item['source']
+    
+    ###    features = item['feature']
+     
         if not brand_count.has_key(brand):
             brand_count[brand] = 0
         brand_count[brand] += 1
         if not category_count.has_key(category):
             category_count[category] = 0
         category_count[category] += 1
-        if not source_count.has_key(source):
-            source_count[source] = 0
-        source_count[source] += 1
-        for (felem,fnum) in feature.items():
-            if not feature_count.has_key(felem):
-                feature_count[felem] = 0
-            feature_count[felem] += int(fnum)
 
+        '''
+        for feature in features.keys():
+            if not feature_count.has_key(feature):
+                feature_count[feature] = 0
+            feature_count[features] += features[feature]
+        '''
     brand_tags = sort_and_filter(brand_count,5)
     category_tags = sort_and_filter(category_count,5)
-    source_tags = sort_and_filter(source_count,2)
+    '''
     feature_tags = sort_and_filter(feature_count,10)
-    return [brand_tags,category_tags,feature_tags,source_tags]
+    '''
+    feature_tags = []
+    return (brand_tags,category_tags,feature_tags)
 
 
 def itemlis(contents):
     res_lis = []
     for item in contents:
-        res_lis.append(json.loads(item))
+        item = json.loads(item)
+        res_lis.append((item["imgurl"],item["url"],item["title"]))
     return res_lis
-'''
-item
-0 - imgurl
-1 - url
-2 - title
-3 - property
 
-'''
 
 
 
