@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from threading import Thread
+import queue
 import json
 import os , sys
 #导入requests库(请求和页面抓取)
@@ -22,6 +26,7 @@ import jieba as jb
 import jieba.analyse
 
 
+f=open("rest_idx.txt", 'r')
 
 #设置请求中头文件的信息
 headers = {'User-Agent':'Mozilla/5.0 '
@@ -29,24 +34,26 @@ headers = {'User-Agent':'Mozilla/5.0 '
                         'AppleWebKit/537.36 (KHTML,'
                         ' like Gecko) Chrome/76.0.3809.132 '
                         'Safari/537.36',
-'Accept':'text/html;q=0.9,*/*;q=0.8',
-'Accept-Charset':'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+#'Accept':'text/html;q=0.9,*/*;q=0.8',
+#'Accept-Charset':'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
 #"Accept-Language": "zh-CN,zh;q=0.9",
-'Connection':'close',
+#'Connection':'close',
 'Referer':'https://www.jd.com/'
 }
 
-
+q = queue.Queue()
+NUM = 5
+JOBS = 10
 #cookies=***
-def crawl_jd_cmt_tag(prdtId=100009691096):# change for url
+def crawl_jd_cmt_tag(prdtId):# change for url
 
     url=r"https://sclub.jd.com/comment/" \
-        r"productPageComments.action?callback=fetchJSON_comment98vv1279&" \
-        r"productId=%s&" \
-        r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1"%prdtId
+        r"productPageComments.action?callback=fetchJSON_comment98vv106813&" \
+        r"productId={}&" \
+        r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1".format(prdtId)
     comment_tag_path = r'C:\TC-prog\JetBrain_pycharm_TC' \
                        r'\PycharmProjects\Crawler_EEFinal' \
-                       r'\jd_cmt_tags\httpsitem.jd.com%s.html.txt'%prdtId
+                       r'\jd_cmt_tags\httpsitem.jd.com{}.html.txt'.format(prdtId)
 
     try:
         r=requests.get(url,headers=headers,timeout=5)
@@ -71,32 +78,52 @@ def crawl_jd_cmt_tag(prdtId=100009691096):# change for url
 
         for r_json_tag in r_json_tags:
             with open(comment_tag_path,'a+') as file:
-                file.write(r_json_tag['name']+'\t'+str(r_json_tag['count'])+'\n')
-                print(r_json_tag['name']+'\t'+str(r_json_tag['count']))
+                file.write(r_json_tag['name']+
+                           '\t'+str(r_json_tag['count'])+'\n')
+                print(r_json_tag['name']+
+                      '\t'+str(r_json_tag['count']))
     except:
-        print('large json')
+        print('failed')
 
 
-if __name__ == '__main__':
-
-    with open("Fi-index.txt",'r') as f:
-        for line in f.readlines():
+def run():
+    global f
+    for line in f.readlines():
+        try:
             pp = line.split('\t')
             webpage = pp[1].strip('\n')
-            print (webpage)
-            temp=webpage[14:-5]
-            pos=0
+            print(webpage)
+            temp = webpage[14:-5]
+            pos = 0
             for i in range(len(temp)):
                 if temp[i] == 'm':
                     pos = i
-            itemID=temp[pos+1:]
-            print(itemID)
-            if(len(webpage)>35):
+            itemID = temp[pos + 1:]
+
+            if (len(webpage) > 35):
                 continue
-            print (itemID)
-            try:
-                itemID=int(itemID)
-                crawl_jd_cmt_tag(itemID)
-                time.sleep(random.random() * 3)
-            except:
-                print("Invalid Input!")
+
+            crawl_jd_cmt_tag(itemID)
+            time.sleep(random.random() * 3)
+        except:
+            print("Invalid Input!")
+
+
+def working():
+    while True:
+        #arguments = q.get()
+        run()
+        q.task_done()
+
+
+#fork NUM个线程等待队列
+for i in range(NUM):
+    t = Thread(target=working)
+    t.setDaemon(True)
+    t.start()
+#把JOBS排入队列
+for i in range(JOBS):
+    q.put(i)
+#阻塞，等待所有JOBS完成
+q.join()
+f.close()

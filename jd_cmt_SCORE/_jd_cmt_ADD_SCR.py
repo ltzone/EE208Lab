@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+import math
+from threading import Thread
+import queue
 import json
 import os , sys
 #导入requests库(请求和页面抓取)
@@ -20,9 +24,9 @@ import matplotlib.pyplot as plt
 import jieba as jb
 #导入结巴分词(关键词提取)
 import jieba.analyse
-import math
 
 
+f=open("cmt_jd.txt", 'r')
 
 #设置请求中头文件的信息
 headers = {'User-Agent':'Mozilla/5.0 '
@@ -38,14 +42,19 @@ headers = {'User-Agent':'Mozilla/5.0 '
 }
 
 
+q = queue.Queue()
+NUM = 5
+JOBS = 10
 #cookies=***
-def crawl_jd_cmt_SCORE(prdtId=100009691096):# change for url
+def crawl_jd_cmt_SCORE(prdtId):# change for url
 
     url=r"https://sclub.jd.com/comment/" \
         r"productPageComments.action?callback=fetchJSON_comment98vv1279&" \
-        r"productId=%s&" \
-        r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1"%prdtId
-    comment_tag_path = r'result\httpsitem.jd.com%s.html.txt'%prdtId
+        r"productId={}&" \
+        r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1".format(prdtId)
+    comment_tag_path = r'C:\TC-prog\JetBrain_pycharm_TC' \
+                       r'\PycharmProjects\Crawler_EEFinal' \
+                       r'\jd_comment_score\httpsitem.jd.com{}.html.txt'.format(prdtId)
 
     try:
         r=requests.get(url,headers=headers,timeout=5)
@@ -86,31 +95,48 @@ def crawl_jd_cmt_SCORE(prdtId=100009691096):# change for url
             print("httpsitem.jd.com"+str(prdtId) +".html"
                        + '\t' + str(score))
 
-
     except:
         print('large json')
 
 
-if __name__ == '__main__':
-
-    with open("Final_available_idx.txt",'r') as f:
-        for line in f.readlines():
+def run():
+    global f
+    for line in f.readlines():
+        try:
             pp = line.split('\t')
             webpage = pp[1].strip('\n')
-            print (webpage)
-            temp=webpage[14:-5]
-            pos=0
+            print(webpage)
+            temp = webpage[14:-5]
+            pos = 0
             for i in range(len(temp)):
                 if temp[i] == 'm':
                     pos = i
-            itemID=temp[pos+1:]
+            itemID = temp[pos + 1:]
             print(itemID)
-            if(len(webpage)>35):
+            if (len(webpage) > 35):
                 continue
-            print (itemID)
-            try:
-                itemID=int(itemID)
-                crawl_jd_cmt_SCORE(itemID)
-                time.sleep(random.random() * 3)
-            except:
-                print("Invalid Input!")
+            print(itemID)
+            crawl_jd_cmt_SCORE(itemID)
+            time.sleep(random.random() * 3)
+        except:
+            print("Invalid Input!")
+
+
+def working():
+    while True:
+        #arguments = q.get()
+        run()
+        q.task_done()
+
+
+#fork NUM个线程等待队列
+for i in range(NUM):
+    t = Thread(target=working)
+    t.setDaemon(True)
+    t.start()
+#把JOBS排入队列
+for i in range(JOBS):
+    q.put(i)
+#阻塞，等待所有JOBS完成
+q.join()
+f.close()
