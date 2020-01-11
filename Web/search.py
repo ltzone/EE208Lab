@@ -83,7 +83,7 @@ def highprice_search(searcher, analyzer, command):
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
                         analyzer).parse(command)
-    scoreDocs = searcher.search(query, 50, highprice_sorter).scoreDocs
+    scoreDocs = searcher.search(query, 150, highprice_sorter).scoreDocs
     return read_results(scoreDocs,searcher)
 
 def lowprice_search(searcher, analyzer, command):
@@ -93,7 +93,7 @@ def lowprice_search(searcher, analyzer, command):
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
                         analyzer).parse(command)
-    scoreDocs = searcher.search(query, 50, lowprice_sorter).scoreDocs
+    scoreDocs = searcher.search(query, 150, lowprice_sorter).scoreDocs
     return read_results(scoreDocs,searcher)
 
 def rank_search(searcher, analyzer, command):
@@ -102,7 +102,7 @@ def rank_search(searcher, analyzer, command):
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
                         analyzer).parse(command)
-    scoreDocs = searcher.search(query, 50, rank_sorter).scoreDocs
+    scoreDocs = searcher.search(query, 150, rank_sorter).scoreDocs
     return read_results(scoreDocs,searcher)
 
 def relativity_search(searcher, analyzer, command):
@@ -112,7 +112,7 @@ def relativity_search(searcher, analyzer, command):
     command = (" ".join(seg_list))
     query = QueryParser(Version.LUCENE_CURRENT, "title",
                         analyzer).parse(command)
-    scoreDocs = searcher.search(query, 50).scoreDocs
+    scoreDocs = searcher.search(query, 150).scoreDocs
     return read_results(scoreDocs,searcher)
 
 
