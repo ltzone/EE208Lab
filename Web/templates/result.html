@@ -192,15 +192,15 @@ $def pageend2(count):
 	<div id="pageturn">
 		<nav aria-label="Page navigation">
 		  <ul class="pagination">
-		    <li>
-		      <a id="begin" href="javascript:start()" aria-label="Start">
+		    <li id="begin">
+		      <a  href="javascript:start()" aria-label="Start">
 		        <span aria-hidden="true">&laquo;</span>
 		      </a>
 		    </li>
 			$for i in range(pagecount):
-				<li><a id="pg$(i+1)" href="javascript:pg$(i+1)()">$(i+1)</a></li>
-		    <li>
-		      <a id="end" href="javascript:end()" aria-label="End">
+				<li id="pg$(i+1)"><a href="javascript:pg$(i+1)()">$(i+1)</a></li>
+		    <li id="end">
+		      <a  href="javascript:end()" aria-label="End">
 		        <span aria-hidden="true">&raquo;</span>
 		      </a>
 		    </li>
@@ -222,6 +222,7 @@ $def pageend2(count):
 <script type="text/javascript">
     function init() { 
 		document.getElementById("page1").style.display="";
+		document.getElementById("pg1").setAttribute("class","active");
     };
     init();
 </script>
@@ -252,7 +253,9 @@ $def pageend2(count):
 		{
 			var itit="page"+it.toString();
 			document.getElementById(itit).style.display="none";
+			document.getElementById("pg"+it.toString()).setAttribute("class","");
 		}
+		document.getElementById("pg1").setAttribute("class","active");
 	}
 	function end()
 	{
@@ -261,8 +264,10 @@ $def pageend2(count):
 		{
 			var itit="page"+it.toString();
 			document.getElementById(itit).style.display="none";
+			document.getElementById("pg"+it.toString()).setAttribute("class","");
 		}
 		document.getElementById("page"+pages.toString()).style.display="";
+		document.getElementById("pg"+pages.toString()).setAttribute("class","active");
 	}
 	$for i in range(pagecount):
 		function pg$(i+1)()
@@ -271,7 +276,9 @@ $def pageend2(count):
 			for (var it=1;it<=pages;++it){
 				var itit="page"+it.toString();
 				document.getElementById(itit).style.display="none";
+				document.getElementById("pg"+it.toString()).setAttribute("class","");
 			}
 			document.getElementById("page$(i+1)").style.display="";
+			document.getElementById("pg$(i+1)").setAttribute("class","active");
 		}
 </script>
