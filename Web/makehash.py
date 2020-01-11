@@ -19,6 +19,13 @@ def makeHash(imgurl):
     hash_value = str(Hash2(normalize(des.tolist())))
     return hash_value,des
 
+def makeHash_local(img):
+    img=cv2.imread(img,0)
+    orb = cv2.ORB_create()
+    kp,des = orb.detectAndCompute(img, None)
+    hash_value = str(Hash2(normalize(des.tolist())))
+    return hash_value,des
+
 def Hash(des):
     d = des.mean(axis=0)[:3]
     s = 0

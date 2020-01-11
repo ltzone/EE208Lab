@@ -22,7 +22,7 @@ from org.apache.lucene.search import SortField
 from org.apache.lucene.search import TermQuery
 import jieba
 import re
-
+import makehash
 
 
 '''
@@ -234,15 +234,26 @@ item
 
 '''
 
+def similarity(det1,det2):
+    return 1
+
 def match_pict(img):
-    pass
+    with open("../hash.json",'r') as load_f:
+        load_list = json.load(load_f)
+        hash_val, det = makeHash_local(img)
+        hits = load_list[int(hash_val)]
+    docs = []
+    for hit in hits:
+        docs.append(hit['url'],similarity(hit['det'],det))
+    docs_sorted = sorted(docs,key = lambda kv:(kv[1], kv[0]))
+    res_lis = [i for (i,j) in docs_sorted]
+    return res_lis
 
 def pict_search(img):
-    #urls = match_pict(img)
+    urls = match_pict(img)
     STORE_DIR = "FINDEX"
     directory = SimpleFSDirectory(File(STORE_DIR))
     searcher = IndexSearcher(DirectoryReader.open(directory))
-    urls = ["http://item.jd.com/59883828898.html"]
     res_lis = []
     for url in urls:
         query = TermQuery(Term("url",url))
