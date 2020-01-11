@@ -235,7 +235,8 @@ item
 '''
 
 def similarity(det1,det2):
-    return 1
+    det = (det1 - det2).fabs()/255
+    return np.sum(det)
 
 def match_pict(img):
     with open("../hash.json",'r') as load_f:
@@ -247,6 +248,7 @@ def match_pict(img):
         docs.append(hit['url'],similarity(hit['det'],det))
     docs_sorted = sorted(docs,key = lambda kv:(kv[1], kv[0]))
     res_lis = [i for (i,j) in docs_sorted]
+    print res_lis
     return res_lis
 
 def pict_search(img):

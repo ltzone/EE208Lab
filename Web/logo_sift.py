@@ -5,7 +5,7 @@ import glob
 
 def logo_recognition(img):
 
-    brands = ["dell", "hp", "sony", "lenovo"]
+    brands = ["dell", "hp", "sony", "lenovo", "apple", "beats", "ibm", "jbl", "nikon", "ThinkPad", "HUAWEI", "Microsoft", "acer", "aigo", "asus", "casio", "htc", "logitec"]
 
     # the search image
 
@@ -25,7 +25,7 @@ def logo_recognition(img):
         note = []
         trainImg = []
         score = 0.0
-        for filename in glob.glob('../logo_recognition/logo_images/%s/*.jpg' %brand):
+        for filename in glob.glob('../logo_recognition/logo_images/%s/*' %brand):
             im = cv2.imread(filename,0)
             im = cv2.GaussianBlur(im, (3,3), 0)
             trainImg.append(im)

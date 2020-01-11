@@ -56,16 +56,16 @@ class pictsearch:
         if web.input().method == 'logo':
             kw = logo_recognition("static/userupload/tmp")
             vm_env.attachCurrentThread()
-            contents = search_command(kw,'relativity'.decode('utf-8'))
+            contents = search_command(kw,'rank'.decode('utf-8'))
             filtertags = total(contents)
             results = itemlis(contents)
-            return render.result(kw, 'relativity', results, filtertags)
+            return render.result(kw, 'rank', results, filtertags)
         else:
             vm_env.attachCurrentThread()
             contents = pict_search("static/userupload/tmp")
             filtertags = total(contents)
             results = itemlis(contents)
-            return render.result('LSH Match', 'relativity', results, filtertags)
+            return render.result('LSH Match', 'rank', results, filtertags)
 
 class search:
     def GET(self):
