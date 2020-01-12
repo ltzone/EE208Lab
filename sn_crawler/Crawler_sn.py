@@ -8,6 +8,7 @@ import Queue
 import threading
 from threading import Thread
 import time
+import string
 import urlparse
 from BLF import *
 from PySide.QtGui import *
@@ -61,7 +62,6 @@ class BrowserRender(QWebView):
 
 
 def valid_filename(s):
-    import string
     valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
     s = ''.join(c for c in s if c in valid_chars)
     if len(s) > 255:
@@ -99,6 +99,17 @@ def get_clean_url(url):
     ret = urlparse.urlparse(url)
     link = urlparse.urljoin(ret.scheme + "://" + ret.netloc, ret.path)
     return link
+
+
+def get_comment_id(url,content):
+    ret = urlparse.urlparse(url)
+    store_id = ret.path[1:11]
+    commodity_id = ret.path[12:-5]
+    content = get_page(url)
+    x = content.find("clusterId")
+    cluster_id = content[x+11:x+24]
+    cluster_id = filter(str.isdigit, cluster_id)
+    return '-'.join([cluster_id,commodity_id,store_id])
 
 
 '''
@@ -155,12 +166,15 @@ def get_data(content,url,price):
     return data
 
 
-def add_page_to_folder(page,a):  # 将网页存到文件夹里，将网址和对应的文件名写入index.txt中
+def add_page_to_folder(page,a,content):  # 将网页存到文件夹里，将网址和对应的文件名写入index.txt中
     index_filename = 'index_sn.txt'  # index.txt中每行是'网址 对应的文件名'
     folder = 'html_sn'  # 存放网页的文件夹
     filename = valid_filename(page)+'.txt'  # 将网址变成合法的文件名
+
+    comment_id = get_comment_id(page,content)
+
     index = open(index_filename, 'a')
-    index.write(page.encode('ascii', 'ignore') + '\t' + filename + '\n')
+    index.write(page.encode('ascii', 'ignore') + '\t' + filename + '\t' + comment_id + '\n')
     index.close()
     if not os.path.exists(folder):  # 如果文件夹不存在则新建
         os.mkdir(folder)
@@ -247,8 +261,22 @@ print("finished in %lfs" % (endtime - start_time))
 '''
 
 
-pages = ['https://list.suning.com/0-20006-0.html','https://www.suning.com/pinpai/2450-258007-0.html']
-max_page = 6
+
+pages = ['https://list.suning.com/0-20101-0.html']
+#1:'https://list.suning.com/0-20006-0.html','https://list.suning.com/0-258004-0.html','https://list.suning.com/0-20090-0.html'
+#2:'https://list.suning.com/0-20062-0.html','https://list.suning.com/0-505155-0.html','https://list.suning.com/0-500678-0.html'
+#3:'https://list.suning.com/0-157123-0.html'
+#4:'https://list.suning.com/0-157244-0.html'
+#5:'https://list.suning.com/0-258011-0.html'
+#6:'https://list.suning.com/0-157133-0.html'
+#7:'https://list.suning.com/0-157162-0.html'
+#8:'https://list.suning.com/0-157250-0.html'
+#9:'https://list.suning.com/0-258009-0.html'
+#10:'https://list.suning.com/0-258007-0.html','https://list.suning.com/0-258006-0.html'
+#11:'https://list.suning.com/0-500679-0.html'
+#12:'https://list.suning.com/0-20101-0.html'
+#13;'https://list.suning.com/0-258005-0.html'
+max_page = 10000
 
 start_time = time.time()
 
@@ -285,15 +313,22 @@ while len(pages):
             print "price error"
             continue
 
-        count += 1
-        print count
-        print page
-        set_in(page)
+        try:
+            print page
+            set_in(page)
 
-        time.sleep(5)
+            time.sleep(5)
 
-        data = get_data(content,page,price)
-        add_page_to_folder(page,data)
+            data = get_data(content,page,price)
+            add_page_to_folder(page,data,content)
+            count += 1
+            print count
+        except:
+            print "crawler error"
+            continue
+
+
+
 
 
 
