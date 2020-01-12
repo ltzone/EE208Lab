@@ -4,7 +4,7 @@
 %插入图片
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111131428.png}
+\includegraphics[width=13.5cm]{web source code jd.png}
 \caption{京东网页源码中查询评价的结果} %图片下方文字标签
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
@@ -15,7 +15,7 @@
 %插入图片
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111132633.png}
+\includegraphics[width=13.5cm]{network jd.png}
 \caption{加载请求} %图片下方文字标签
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
@@ -24,7 +24,7 @@
 %插入图片
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111132832.png}
+\includegraphics[width=13.5cm]{find request jd.png}
 \caption{找到评论所在的请求} %图片下方文字标签
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
@@ -33,16 +33,16 @@
 %插入图片
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111133155.png}
+\includegraphics[width=13.5cm]{find url jd.png}
 \caption{找到url} %图片下方文字标签
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
 
-在这个“fetchJSON_comment”里面，有我们想要的评论信息。第一个标签comments，是评论的内容；第二个是评论的标签；第三个是评论的好评数量等数据统计。
+在这个“fetchJSON\_comment”里面，有我们想要的评论信息。第一个标签comments，是评论的内容；第二个是评论的标签；第三个是评论的好评数量等数据统计。
 %插入图片
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111133649.png}
+\includegraphics[width=13.5cm]{json items jd.png}
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
 
@@ -51,7 +51,7 @@
 一开始完成这个脚本的时候，设计的功能是将评论的内容（第一部分）爬下来。
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111161800.png}
+\includegraphics[width=13.5cm]{cmt contents eg jd.png}
 \caption{airpods pro的评论文字} %图片下方文字标签
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
@@ -64,12 +64,12 @@
 %插入代码
 \begin{python}
 url=r"https://sclub.jd.com/comment/" \
-    r"productPageComments.action?callback=fetchJSON_comment98vv106813\&" \
-    r"productId=\{\}\&" \
-    r"score=0\&sortType=5\&page=0\&pageSize=10\&isShadowSku=0\&fold=1".format(prdtId)
-comment_tag_path = r'C:\\TC-prog\\JetBrain\_pycharm\_TC' \
-                   r'\\PycharmProjects\\Crawler\_EEFinal' \
-                   r'\\jd\_cmt\_tags\\httpsitem.jd.com\{\}.html.txt'.format(prdtId)
+    r"productPageComments.action?callback=fetchJSON_comment98vv106813&" \
+    r"productId={}&" \
+    r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1".format(prdtId)
+comment_tag_path = r'C:\TC-prog\JetBrain_pycharm_TC' \
+                   r'\PycharmProjects\Crawler_EEFinal' \
+                   r'\jd_cmt_tags\httpsitem.jd.com{}.html.txt'.format(prdtId)
 try:
     r=requests.get(url,headers=headers,timeout=5)
     r.raise_for_status()
@@ -115,10 +115,10 @@ try:
 %插入图片
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111154351.png}
+\includegraphics[width=13.5cm]{cmt tags eg jd.png}
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
-可以
+可以根据这点读取评论的标签和数量：
 \begin{python}
 print(r_json_tag['name']+
                       '\t'+str(r_json_tag['count']))
@@ -140,24 +140,24 @@ NOTE: 由于后面进行批量爬取的时候很有可能出现爬取失败的�
 \subsection{批量爬取及多线程}
 由于要处理的对象数目庞大，仅仅使用线性的程序不只是慢，而且可靠性也会大打折扣。所以这个脚本需要写成多线程的，来保证程序不会因为一个线程的终止而停下来。从我实现的顺序，是先完成了重复爬取，再写的多线程，现在不妨就一起介绍了。
 
-注意到请求的url具有相对稳定的格式，仅有两处是变化的：一是“fetchJSON_comment98vv106813”这样的一串，二是后面的商品ID（通过商品页url可以过滤出来）。经过多次实验，可以发现对于第一串，只要具有形如fetchJSON_comment98vv106813的格式，请求往往都是可以被接受的。于是在封装的函数里，比较容易写出一般形式的url：
+注意到请求的url具有相对稳定的格式，仅有两处是变化的：一是“fetchJSON\_comment98vv106813”这样的一串，二是后面的商品ID（通过商品页url可以过滤出来）。经过多次实验，可以发现对于第一串，只要具有形如fetchJSON\_comment98vv106813的格式，请求往往都是可以被接受的。于是在封装的函数里，比较容易写出一般形式的url：
 \begin{python}
 url=r"https://sclub.jd.com/comment/" \
-        r"productPageComments.action?callback=fetchJSON_comment98vv106813\&" \
-        r"productId=\{\}\&" \
-        r"score=0\&sortType=5\&page=0\&pageSize=10\&isShadowSku=0\&fold=1".format(prdtId)
+        r"productPageComments.action?callback=fetchJSON_comment98vv106813&" \
+        r"productId={}&" \
+        r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1".format(prdtId)
 \end{python}
 将前面的步骤封装进函数：
 \begin{python}
 def crawl_jd_cmt_tag(prdtId):# change for url
 
     url=r"https://sclub.jd.com/comment/" \
-   	   r"productPageComments.action?callback=fetchJSON_comment98vv106813\&" \
- 	   r"productId=\{\}\&" \
- 	   r"score=0\&sortType=5\&page=0\&pageSize=10\&isShadowSku=0\&fold=1".format(prdtId)
-    comment_tag_path = r'C:\\TC-prog\\JetBrain\_pycharm\_TC' \
-                   r'\\PycharmProjects\\Crawler\_EEFinal' \
-                   r'\\jd\_cmt\_tags\\httpsitem.jd.com\{\}.html.txt'.format(prdtId)
+   	   r"productPageComments.action?callback=fetchJSON_comment98vv106813&" \
+ 	   r"productId={}&" \
+ 	   r"score=0&sortType=5&page=0&pageSize=10&isShadowSku=0&fold=1".format(prdtId)
+    comment_tag_path = r'C:\TC-prog\JetBrain_pycharm_TC' \
+                   r'\PycharmProjects\Crawler_EEFinal' \
+                   r'\jd_cmt_tags\httpsitem.jd.com{}.html.txt'.format(prdtId)
 
     try:
         r=requests.get(url,headers=headers,timeout=5)
@@ -171,21 +171,18 @@ def crawl_jd_cmt_tag(prdtId):# change for url
         if raw[i] == '(':
             pos = i
     try:
-        # data0 = re.sub(u'\^fetchJSON\_comment98vv106813\\(', '', html)
-        r\_json\_str = r.text[pos + 1:-2]
-        # print (r\_json\_str)
-        r\_json\_obj=json.loads(r\_json\_str,strict=False)
-        print (r\_json\_obj)
-        r\_json\_tags=r\_json\_obj['hotCommentTagStatistics']
-        print ('狗东评论标签：')
+        r_json_str = r.text[pos + 1:-2]
+        r_json_obj=json.loads(r_json_str,strict=False)
+        r_json_tags=r_json_obj['hotCommentTagStatistics']
+        
         # 追加模式，逐行写入
 
-        for r\_json\_tag in r\_json\_tags:
-            with open(comment\_tag\_path,'a+') as file:
-                file.write(r\_json\_tag['name']+
-                           '\\t'+str(r\_json\_tag['count'])+'\\n')
-                print(r\_json\_tag['name']+
-                      '\\t'+str(r\_json\_tag['count']))
+        for r_json_tag in r_json_tags:
+            with open(comment_tag_path,'a+') as file:
+                file.write(r_json_tag['name']+
+                           '\t'+str(r_json_tag['count'])+'\n')
+                print(r_json_tag['name']+
+                      '\t'+str(r_json_tag['count']))
     except:
         print('failed')
 \end{python}
@@ -200,8 +197,8 @@ def run():
     global f
     for line in f.readlines():
         try:
-            pp = line.split('\\t')
-            webpage = pp[1].strip('\\n')
+            pp = line.split('\t')
+            webpage = pp[1].strip('\n')
             print(webpage)
             temp = webpage[14:-5]
             pos = 0
@@ -213,7 +210,7 @@ def run():
             if (len(webpage) > 35):
                 continue
             print(itemID)
-            crawl\_jd\_cmt\_tag(itemID)
+            crawl_jd_cmt_tag(itemID)
             time.sleep(random.random() * 3)
         except:
             print("Invalid Input!")
@@ -222,7 +219,7 @@ def working():
     while True:
         #arguments = q.get()
         run()
-        q.task\_done()
+        q.task_done()
 
 
 #fork NUM个线程等待队列
@@ -243,13 +240,13 @@ NOTE：有必要解释一下run函数中的工作。爬取2w+条商品生成了�
 %插入图片
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111161937.png}
+\includegraphics[width=13.5cm]{folder view jd.png}
 \caption{文件夹中显示，已打码处理} %图片下方文字标签
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111162544.png}
+\includegraphics[width=13.5cm]{contents eg jd.png}
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
 
@@ -262,7 +259,7 @@ NOTE：有必要解释一下run函数中的工作。爬取2w+条商品生成了�
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111202951.png}
+\includegraphics[width=13.5cm]{data eg jd.png}
 \caption{productCommentSummary内容的部分截图}
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
@@ -277,32 +274,24 @@ score=int(rate*0.7+math.log10(sumcmt)*5+
 实现打分的代码块如下：
 \begin{python}
     try:
-        # data0 = re.sub(u'\^fetchJSON\_comment98vv106813\\(', '', html)
-        r\_json\_str = r.text[pos + 1:-2]
-        # print (r\_json\_str)
-        r\_json\_obj=json.loads(r\_json\_str,strict=False)
-        #print (r\_json\_obj)
-        r\_json\_Sum=r\_json\_obj['productCommentSummary']
-        print ('狗东评论打分：')
-        print(r\_json\_Sum)
+        r_json_str = r.text[pos + 1:-2]
+        r_json_obj=json.loads(r_json_str,strict=False)
+        r_json_Sum=r_json_obj['productCommentSummary']
         # 追加模式，逐行写入
-        with open(comment\_tag\_path, 'w') as file:
-            sumcmt=r\_json\_Sum['commentCount']
-            rate=r\_json\_Sum['goodRateShow'] # 好评率*100
-            #good=r\_json\_Sum['goodCount'] # 好评数
-            #gen =r\_json\_Sum['generalCount'] # 中评数
-            #poor=r\_json\_Sum['poorCount'] # 差评数
-            video =r\_json\_Sum['videoCount']
-            after =r\_json\_Sum['afterCount']
+        with open(comment_tag_path, 'w') as file:
+            sumcmt=r_json_Sum['commentCount']
+            rate=r_json_Sum['goodRateShow'] # 好评率*100
+            video =r_json_Sum['videoCount']
+            after =r_json_Sum['afterCount']
 
             score=int(rate*0.7+math.log10(sumcmt)*5+
                           ((after+video)*1.0)/sumcmt/0.05)
 
 
             file.write("httpitem.jd.com"+str(prdtId) +".html"
-                       + '\\t' + str(score) + '\\n')
+                       + '\t' + str(score) + '\n')
             print("httpsitem.jd.com"+str(prdtId) +".html"
-                       + '\\t' + str(score))
+                       + '\t' + str(score))
 
     except:
         print('failed')
