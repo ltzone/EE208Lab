@@ -1,5 +1,6 @@
 # coding=UTF-8
 import cv2
+import math
 import numpy as np
 import urllib
 import os
@@ -47,7 +48,7 @@ def getUrl(path,filename):
     imgurl = f[2].strip()
     return url,imgurl
 
-def getfearture(imgurl):
+def get_feature(imgurl):
     img = "1.jpg"
     urllib.urlretrieve(imgurl,filename="1.jpg")
     img=cv2.imread(img,cv2.IMREAD_COLOR)
@@ -91,10 +92,49 @@ def getfearture(imgurl):
 
     return des
 
+def get_feature_Local(img):
+    img=cv2.imread(img,cv2.IMREAD_COLOR)
 
+    imginfo = img.shape
+    height = int(math.floor(imginfo[0]/8))
+    width = int(math.floor(imginfo[1]/8))
+
+    des = []
+
+    for p in range(2,6):
+        for q in range(2,6):
+            e_b = 0.0
+            e_g = 0.0
+            e_r = 0.0
+            h_b = 0
+            h_g = 0
+            h_r = 0
+            for i in range(height):
+                for j in range(width):
+                    b,g,r = img[i+p*height,j+q*width]
+                    index_b = int(b)
+                    index_g = int(g)
+                    index_r = int(r)
+                    if index_b+index_g+index_r:
+                        e_b += float(index_b)/(index_b+index_g+index_r)
+                        e_g += float(index_g)/(index_b+index_g+index_r)
+                        e_r += float(index_r)/(index_b+index_g+index_r)
+            if e_b+e_g+e_r:
+                h_b = e_b/(e_b+e_g+e_r)
+                h_g = e_g/(e_b+e_g+e_r)
+                h_r = e_r/(e_b+e_g+e_r)
+            for i in [h_b, h_g, h_r]:
+                if i < 0.31:
+                    des.append(0)
+                elif i > 0.355:
+                    des.append(2)
+                else:
+                    des.append(1)
+
+    return des
 if __name__=='__main__':
-    hash_table_ = [[[] for i in range(4096)] for j in range(5)]
-    folder_1 = 'html_sn'
+    hash_table = [[[] for i in range(4096)] for j in range(5)]
+    folder_1 = '../sn_crawler/html_sn'
     projs = [ \
 		[7, 10, 16, 21, 23, 34, 45, 48, 61, 62, 69, 77], 
 		[12, 20, 23, 30, 32, 40, 57, 61, 62, 70, 78, 94], 
@@ -102,24 +142,30 @@ if __name__=='__main__':
 		[13, 18, 19, 42, 52, 65, 67, 68, 71, 88, 90, 92], 
 		[4, 6, 15, 23, 28, 37, 45, 46, 62, 81, 83, 93]]
 
+    cnt = 0
     for root, dirs, files in os.walk(folder_1):
         for file in files:
-            url,imgurl = getUrl(folder_1,file)
             try:
-                det = get_feature(imgurl)
-            except:
-                print "error"
+                url,imgurl = getUrl(folder_1,file)
+                cnt+= 1
+            except Error:
+                print "Error"
                 continue
 
+            det = get_feature(imgurl)
+
+
             d = [url,det]
-            print d
+            print cnt,d
             for j in range(5):
-            	hash_val = LSHash(det,proj[j])
-            	hash_table[j][int(hash_value)].append(d)
-            	print j, hash_value
+            	hash_val = LSHash(det,projs[j])
+            	hash_table[j][int(hash_val)].append(d)
+            	print j, hash_val
 
+            if (cnt%100 == 0):
+                with open("hash_table.json",'w') as file_obj:
+                    json.dump(hash_table,file_obj)
 
-
-    filename = 'hash_table.json'
-    with open(filename,'w') as file_obj:
+    with open("hash_table.json",'w') as file_obj:
         json.dump(hash_table,file_obj)
+
