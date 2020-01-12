@@ -25,7 +25,7 @@ import jieba as jb
 #导入结巴分词(关键词提取)
 import jieba.analyse
 
-f=open("index_sn.txt", 'r')
+f=open("index_sn_part4.txt", 'r')
 
 #设置请求中头文件的信息
 headers = {'User-Agent':'Mozilla/5.0 '
@@ -71,19 +71,19 @@ def crawl_sn_cmt_tag(sku, shop):# change for url
         r_json_dict = r_json_obj['reviewCounts'][0]  # 好评中评差评等的统计
         # print ('苏宁评论标签：')
         # 追加模式，逐行写入
+        if not os.path.exists(comment_tag_path):
+            with open(comment_tag_path, 'a+') as file:
+                sumcnt = int(r_json_dict['totalCount'])
+                good = int(r_json_dict['fiveStarCount'])  # 好评数
+                # gen =r_json_dict['fourStarCount'] # 中评数
+                # poor=r_json_dict['oneStarCount'] # 差评
+                after = int(r_json_dict['againCount'])
+                # print(good, sumcmt, after)
+                # print(good/sumcmt)
+                score = int((1.0 * good / sumcnt * 0.8)*100+math.log(sumcnt,10)* 7)
 
-        with open(comment_tag_path, 'w') as file:
-            sumcmt = int(r_json_dict['totalCount'])
-            good = int(r_json_dict['fiveStarCount'])  # 好评数
-            # gen =r_json_dict['fourStarCount'] # 中评数
-            # poor=r_json_dict['oneStarCount'] # 差评
-            after = int(r_json_dict['againCount'])
-            # print(good, sumcmt, after)
-            # print(good/sumcmt)
-            score = int((1.0 * good / sumcmt * 0.8 + (after * 1.0) / sumcmt*15) * 100)
-
-            file.write("httpproduct.suning.com" + shop + sku + ".html" + '\t' + str(score) + '\n')
-            print(shop + sku + '\t' + str(score))
+                file.write("httpproduct.suning.com" + shop + sku + ".html" + '\t' + str(score) + '\n')
+                print(shop + sku + '\t' + str(score))
     except:
         print('large json')
 
@@ -105,7 +105,7 @@ def run():
             itemID = temp[pos + 1:]
             # print(itemID)
             # print(type(itemID))
-            if (len(itemID) != 21): continue
+            #if (len(itemID) != 21): continue
             shop = itemID[:-11]
             sku = itemID[10:]
             print(shop, sku)

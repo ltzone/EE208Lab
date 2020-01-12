@@ -134,13 +134,11 @@ def crawl():
 
 
 if __name__ == '__main__':
-
+    mod=998244353
     len_a = len(sys.argv)
     seed = sys.argv[1] if len_a > 1 else 'https://item.jd.com/100001484839.html'
     max_page = int(sys.argv[2]) if len_a > 2 else 15000
     parrel_num = int(sys.argv[3]) if len_a > 3 else 8
-
-    start_time = time.time()
 
     banlist = []
     with open("banlist.txt", "r") as F:
@@ -150,7 +148,7 @@ if __name__ == '__main__':
     Q = Queue.Queue()
     count = 0
     graph = {}
-    crawled = Bitarray(998244353)
+    crawled = Bitarray(mod)
     varlock = threading.Lock()
 
     for i in range(parrel_num):
@@ -158,5 +156,4 @@ if __name__ == '__main__':
         tas.setDaemon(True)
         tas.start()
     Q.join()
-    endtime = time.time()
-    print("finished in %lfs" % (endtime - start_time))
+    
