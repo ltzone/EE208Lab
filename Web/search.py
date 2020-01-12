@@ -103,43 +103,36 @@ def read_results(scoreDocs, searcher):
 def highprice_search(searcher, analyzer, command):
     # 按价格降序排序
     highprice_sorter = Sort(SortField("price",SortField.Type.LONG,True))
-    seg_list = jieba.cut(command)
-    command = (" ".join(seg_list))
-    query = QueryParser(Version.LUCENE_CURRENT, "title",
-                        analyzer).parse(command)
+    query = command_to_query(command,analyzer)
     scoreDocs = searcher.search(query, 150, highprice_sorter).scoreDocs
     return read_results(scoreDocs,searcher)
 
 def lowprice_search(searcher, analyzer, command):
     # 按价格升序排序
     lowprice_sorter = Sort(SortField("price",SortField.Type.LONG))
-    seg_list = jieba.cut(command)
-    command = (" ".join(seg_list))
-    query = QueryParser(Version.LUCENE_CURRENT, "title",
-                        analyzer).parse(command)
+    query = command_to_query(command,analyzer)
     scoreDocs = searcher.search(query, 150, lowprice_sorter).scoreDocs
     return read_results(scoreDocs,searcher)
 
 def rank_search(searcher, analyzer, command):
     rank_sorter = Sort(SortField("score",SortField.Type.LONG,True))
-    seg_list = jieba.cut(command)
-    command = (" ".join(seg_list))
-    query = QueryParser(Version.LUCENE_CURRENT, "title",
-                        analyzer).parse(command)
+    query = command_to_query(command,analyzer)
     scoreDocs = searcher.search(query, 150, rank_sorter).scoreDocs
     return read_results(scoreDocs,searcher)
 
 def relativity_search(searcher, analyzer, command):
     print "calling relativity_search"
     print command
-    seg_list = jieba.cut(command)
-    command = (" ".join(seg_list))
-    query = QueryParser(Version.LUCENE_CURRENT, "title",
-                        analyzer).parse(command)
-    scoreDocs = searcher.search(query, 150).scoreDocs
+    query = command_to_query(command,analyzer)
+    scoreDocs = searcher.search(query,150).scoreDocs
     return read_results(scoreDocs,searcher)
 
 def advanced_search(searcher, analyzer, command):
+    query = command_to_query(command,analyzer)
+    scoreDocs = searcher.search(query,150).scoreDocs
+    return read_results(scoreDocs,searcher)
+
+def command_to_query(command,analyzer):
     command_dict = parseCommand(command)
     print command_dict
     seg_list = jieba.cut(command_dict['title'])
@@ -149,8 +142,7 @@ def advanced_search(searcher, analyzer, command):
         query = QueryParser(Version.LUCENE_CURRENT, k,
                             analyzer).parse(v)
         querys.add(query, BooleanClause.Occur.MUST)
-    scoreDocs = searcher.search(query,150).scoreDocs
-    return read_results(scoreDocs,searcher)
+    return querys
 
 
 def search_command(query,method):
