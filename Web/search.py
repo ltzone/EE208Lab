@@ -22,7 +22,8 @@ from org.apache.lucene.search import SortField
 from org.apache.lucene.search import TermQuery
 import jieba
 import re
-from makehash import makeHash_local
+from makehash import get_feature_Local, get_feature, LSHash
+
 
 projs = [ 
     [7, 10, 16, 21, 23, 34, 45, 48, 61, 62, 69, 77], 
@@ -282,25 +283,28 @@ def pict_search(img):
  
 
 def similarity(det1,det2):
-    #    det = (det1 - det2).fabs()/255
-    #return np.sum(det)
-    return 1
+    sum = 0
+    for i in range(len(det1)):
+        sum += abs(det1[i]-det2[i])
+    return sum
 
-def get_feature(img):
-    pass
 
 def match_pict(img):
     docs = []
-    imgfeat = get_feature(img)
+    imgfeat = get_feature_Local(img)
     with open("hash_table.json",'r') as load_f:
         load_list = json.load(load_f)
-        for j in range(0,5):
-            hash_val = LSHash(img,proj[j])
-            hits = load_list[int(hash_val)]
+
+        for j in range(5):
+            hash_val = LSHash(imgfeat,projs[j])
+            hits = load_list[j][int(hash_val)]
+            print (len(hits))
             for hit in hits:
-                docs.append(hit[0],similarity(imgfeat,hit[1]))
+                elem = hit[0],similarity(imgfeat,hit[1])
+                if elem not in docs:
+                    docs.append(elem)
     docs_sorted = sorted(docs,key = lambda kv:(kv[1]))
-    res_lis = [i for (i,j) in docs_sorted]
+    res_lis = [i for (i,j) in docs_sorted[:50]]
     return res_lis
 
 
