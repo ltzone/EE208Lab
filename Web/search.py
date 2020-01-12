@@ -24,6 +24,13 @@ import jieba
 import re
 from makehash import makeHash_local
 
+projs = [ 
+    [7, 10, 16, 21, 23, 34, 45, 48, 61, 62, 69, 77], 
+    [12, 20, 23, 30, 32, 40, 57, 61, 62, 70, 78, 94], 
+    [10, 14, 18, 21, 25, 33, 39, 44, 50, 67, 91, 93], 
+    [13, 18, 19, 42, 52, 65, 67, 68, 71, 88, 90, 92], 
+    [4, 6, 15, 23, 28, 37, 45, 46, 62, 81, 83, 93]]
+
 def parseCommand(command):
     '''
     input: C title:T author:A language:L
@@ -258,25 +265,7 @@ item
 
 '''
 
-def similarity(det1,det2):
-    #    det = (det1 - det2).fabs()/255
-    #return np.sum(det)
-    return 1
 
-def match_pict(img):
-    with open("hash_table.json",'r') as load_f:
-        load_list = json.load(load_f)
-        hash_val, det = makeHash_local(img)
-        hits = load_list[int(hash_val)]
-    docs = []
-    for hit in hits:
-        # docs.append((hit,similarity(det,det)))
-        docs.append(hit)
-
-    # docs_sorted = sorted(docs,key = lambda kv:(kv[1], kv[0]))
-    # res_lis = [i for (i,j) in docs_sorted]
-    # print len(res_lis[0])
-    return docs
 
 def pict_search(img):
     urls = match_pict(img)
@@ -291,6 +280,28 @@ def pict_search(img):
         res_lis += read_results(scoreDocs,searcher)
     return res_lis
  
+
+def similarity(det1,det2):
+    #    det = (det1 - det2).fabs()/255
+    #return np.sum(det)
+    return 1
+
+def get_feature(img):
+    pass
+
+def match_pict(img):
+    docs = []
+    imgfeat = get_feature(img)
+    with open("hash_table.json",'r') as load_f:
+        load_list = json.load(load_f)
+        for j in range(0,5):
+            hash_val = LSHash(img,proj[j])
+            hits = load_list[int(hash_val)]
+            for hit in hits:
+                docs.append(hit[0],similarity(imgfeat,hit[1]))
+    docs_sorted = sorted(docs,key = lambda kv:(kv[1]))
+    res_lis = [i for (i,j) in docs_sorted]
+    return res_lis
 
 
 if __name__ == '__main__':
