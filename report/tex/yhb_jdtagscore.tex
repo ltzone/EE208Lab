@@ -1,54 +1,54 @@
 \section{商品评论标签提取}
-在了解了商品细节信息（如参数）之后，消费者通常也希望看到已买的人的评价，来作为自己是否要购买该商品的一个重要参考。于是乎，我们为了呈现这一部分信息，需要找到买家评价。但是，如下图所示，评价部分并不是直接显示在网页源代码中的。
+在了解了商品细节信息（如参数）之后，消费者通常也希望看到已买的人的评价，来作为自己是否要购买该商品的一个重要参考。于是乎，我们为了呈现这一部分信息，需要找到买家评价。但是，如下图\ref{img:yhb1}所示，评价部分并不是直接显示在网页源代码中的。
 
 %插入图片
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{web source code jd.png}
+\includegraphics[width=13.5cm]{img/yhbweb_source_code_jd.png}
 \caption{京东网页源码中查询评价的结果} %图片下方文字标签
-%\label{img:zlt_pict1}   % 引用标记，用于文章中引用
+\label{img:yhb_pict1}   % 引用标记，用于文章中引用
 \end{figure}
 
 这也就是说，我们在之前爬到的HTML文件中是找不到评论信息的。
-那么评论到底在哪里呢？简单想想，既然不在这个网址上，那么就一定在它会发送请求的某个网址上。下面不妨试一下，打开一个感兴趣的京东商品。我们在页面中鼠标右键选择检查（或F12）调出浏览器的调试窗口。然后点击network查看所有类型的请求（ALL），点击评论按钮使其加载数据。
+那么评论到底在哪里呢？简单想想，既然不在这个网址上，那么就一定在它会发送请求的某个网址上。下面不妨试一下，打开一个感兴趣的京东商品。我们在页面中鼠标右键选择检查（或F12）调出浏览器的调试窗口。然后点击network查看所有类型的请求（ALL），点击评论按钮使其加载数据。如下图\ref{img:yhb_pic2}所示：
 
 %插入图片
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=13.5cm]{network jd.png}
 \caption{加载请求} %图片下方文字标签
-%\label{img:zlt_pict1}   % 引用标记，用于文章中引用
+\label{img:yhb_pict2}   % 引用标记，用于文章中引用
 \end{figure}
 
-接着，查找加载评论数据的请求。我们可以使用某条评论中的一段话，然后在调试窗口中搜索。
+接着，查找加载评论数据的请求。我们可以使用某条评论中的一段话，然后在调试窗口中搜索。如下图\ref{img:yhb_pic3}所示：
 %插入图片
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=13.5cm]{find request jd.png}
 \caption{找到评论所在的请求} %图片下方文字标签
-%\label{img:zlt_pict1}   % 引用标记，用于文章中引用
+\label{img:yhb_pict3}   % 引用标记，用于文章中引用
 \end{figure}
 
-搜索框下面返回的结果就是了。点击，在右面的headers里面可以看到request url，在preview里可以看到这个url里面的信息。
+搜索框下面返回的结果就是了。点击，在右面的headers里面可以看到request url，在preview里可以看到这个url里面的信息。如下图\ref{img:yhb_pic4}：
 %插入图片
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=13.5cm]{find url jd.png}
 \caption{找到url} %图片下方文字标签
-%\label{img:zlt_pict1}   % 引用标记，用于文章中引用
+\label{img:yhb_pict4}   % 引用标记，用于文章中引用
 \end{figure}
 
-在这个“fetchJSON\_comment”里面，有我们想要的评论信息。第一个标签comments，是评论的内容；第二个是评论的标签；第三个是评论的好评数量等数据统计。
+在这个“fetchJSON\_comment”里面，有我们想要的评论信息。第一个标签comments，是评论的内容；第二个是评论的标签；第三个是评论的好评数量等数据统计。如下图\ref{img:yhb_pic5}所示：
 %插入图片
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=13.5cm]{json items jd.png}
-%\label{img:zlt_pict1}   % 引用标记，用于文章中引用
+\label{img:yhb_pict5}   % 引用标记，用于文章中引用
 \end{figure}
 
 
 
-一开始完成这个脚本的时候，设计的功能是将评论的内容（第一部分）爬下来。
+一开始完成这个脚本的时候，设计的功能是将评论的内容（第一部分）爬下来。下图展示了
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=13.5cm]{cmt contents eg jd.png}
@@ -300,14 +300,14 @@ score=int(rate*0.7+math.log10(sumcmt)*5+
 运行结果：
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111220748.png}
+\includegraphics[width=13.5cm]{res1 jd.png}
 \caption{在文件夹中显示}
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111212528.png}
+\includegraphics[width=13.5cm]{res2 jd.png}
 \caption{内容示例}
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
@@ -317,7 +317,7 @@ score=int(rate*0.7+math.log10(sumcmt)*5+
 在运行较早版本的评论爬虫的时候，有时会像下面这样：
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111214933.png}
+\includegraphics[width=13.5cm]{error eg.png}
 \caption{错误示例}
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
@@ -325,14 +325,14 @@ score=int(rate*0.7+math.log10(sumcmt)*5+
 稍加修改脚本可以使之强制创建文件（当然没法写入内容），可以看到这样的结果：
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111210517.png}
+\includegraphics[width=13.5cm]{files jd.png}
 \caption{在文件夹中显示}
 %\label{img:zlt_pict1}   % 引用标记，用于文章中引用
 \end{figure}
 可以看到，不少商品的ID变为了十位，甚至个位数——这在京东上是无法找到对应商品的。而ID参数是由int类型传递的。
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{TIM图片20200111221638.png}
+\includegraphics[width=13.5cm]{problem code.png}
 \end{figure}
 可以推测，是转为int时前面的0消失了。删去类型转换，以字符串传参，问题解决。
 
