@@ -25,7 +25,7 @@ import jieba as jb
 #导入结巴分词(关键词提取)
 import jieba.analyse
 
-f=open("index_sn.txt", 'r')
+f=open("index_sn_part2.txt", 'r')
 
 #设置请求中头文件的信息
 headers = {'User-Agent':'Mozilla/5.0 '
@@ -68,13 +68,13 @@ def crawl_sn_cmt_tag(sku, shop):# change for url
         r_json_tags=r_json_obj['commodityLabelCountList']# 找到描述标签和个数的内容
         #print ('苏宁评论标签：')
         # 追加模式，逐行写入
-
-        for r_json_tag in r_json_tags:
-            with open(comment_tag_path,'a+') as file:
-                file.write(r_json_tag['labelName']+
-                           '\t'+str(r_json_tag['labelCnt'])+'\n')
-                print(r_json_tag['labelName']+
-                      '\t'+str(r_json_tag['labelCnt']))
+        if not os.path.exists(comment_tag_path):
+            for r_json_tag in r_json_tags:
+                with open(comment_tag_path,'a+') as file:
+                    file.write(r_json_tag['labelName']+
+                               '\t'+str(r_json_tag['labelCnt'])+'\n')
+                    print(r_json_tag['labelName']+
+                          '\t'+str(r_json_tag['labelCnt']))
     except:
         print('large json')
 
@@ -96,7 +96,7 @@ def run():
             itemID = temp[pos + 1:]
             # print(itemID)
             # print(type(itemID))
-            if (len(itemID) != 21): continue
+            #if (len(itemID) != 21): continue
             shop = itemID[:-11]
             sku = itemID[10:]
             print(shop, sku)

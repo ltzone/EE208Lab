@@ -25,7 +25,7 @@ import jieba as jb
 #导入结巴分词(关键词提取)
 import jieba.analyse
 
-f=open("index_sn.txt", 'r')
+f=open("index_sn_part2.txt", 'r')
 
 #设置请求中头文件的信息
 headers = {'User-Agent':'Mozilla/5.0 '
@@ -69,8 +69,6 @@ def crawl_sn_cmt_tag(sku, shop):# change for url
         r_json_obj = json.loads(r_json_str, strict=False)  # 转成python对象
         print(r_json_obj)
         r_json_dict = r_json_obj['reviewCounts'][0]  # 好评中评差评等的统计
-        # print ('苏宁评论标签：')
-        # 追加模式，逐行写入
 
         with open(comment_tag_path, 'w') as file:
             sumcmt = int(r_json_dict['totalCount'])
@@ -105,7 +103,7 @@ def run():
             itemID = temp[pos + 1:]
             # print(itemID)
             # print(type(itemID))
-            if (len(itemID) != 21): continue
+            #if (len(itemID) != 21): continue
             shop = itemID[:-11]
             sku = itemID[10:]
             print(shop, sku)
