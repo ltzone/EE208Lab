@@ -264,10 +264,13 @@ def similarity(det1,det2):
     return 1
 
 def match_pict(img):
-    with open("hash_table.json",'r') as load_f:
-        load_list = json.load(load_f)
-        hash_val, det = makeHash_local(img)
-        hits = load_list[int(hash_val)]
+    docs = []
+    for i in range(1,6):
+        with open("hash_table%s.json"%str(i),'r') as load_f:
+            load_list = json.load(load_f)
+            hash_val, det = globals["makeHash_local"+str(i)](img)
+            hits = load_list[int(hash_val)]
+            docs.append(hit)
     docs = []
     for hit in hits:
         # docs.append((hit,similarity(det,det)))
