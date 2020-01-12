@@ -3,10 +3,7 @@
 \contentsline {chapter}{\numberline {1}京东爬虫}{3}{chapter.1}% 
 \contentsline {section}{\numberline {1.1}商品信息提取}{3}{section.1.1}% 
 \contentsline {chapter}{\numberline {2}苏宁爬虫}{5}{chapter.2}% 
-\contentsline {section}{\numberline {2.1}网页URL爬取}{5}{section.2.1}% 
-\contentsline {section}{\numberline {2.2}商品信息爬取}{5}{section.2.2}% 
-\contentsline {section}{\numberline {2.3}商品评论标签爬取}{5}{section.2.3}% 
-\contentsline {section}{\numberline {2.4}商品评分计算}{5}{section.2.4}% 
+\contentsline {section}{\numberline {2.1}商品信息爬取}{5}{section.2.1}% 
 \contentsline {part}{II\hspace {1em}Index \& Search}{7}{part.2}% 
 \contentsline {chapter}{\numberline {3}构建索引}{9}{chapter.3}% 
 \contentsline {chapter}{\numberline {4}图片匹配}{11}{chapter.4}% 
@@ -17,15 +14,18 @@
 \contentsline {subsection}{\numberline {5.1.1}接口设计}{13}{subsection.5.1.1}% 
 \contentsline {subsection}{\numberline {5.1.2}多字段查询处理}{14}{subsection.5.1.2}% 
 \contentsline {section}{\numberline {5.2}商品按属性排序}{15}{section.5.2}% 
-\contentsline {section}{\numberline {5.3}图片匹配}{15}{section.5.3}% 
-\contentsline {section}{\numberline {5.4}按图片检索}{15}{section.5.4}% 
+\contentsline {section}{\numberline {5.3}按图片检索}{15}{section.5.3}% 
+\contentsline {subsection}{\numberline {5.3.1}图片匹配}{15}{subsection.5.3.1}% 
+\contentsline {subsection}{\numberline {5.3.2}匹配条目查询}{16}{subsection.5.3.2}% 
 \contentsline {part}{III\hspace {1em}Web Front-end}{17}{part.3}% 
 \contentsline {chapter}{\numberline {6}Web框架}{19}{chapter.6}% 
 \contentsline {section}{\numberline {6.1}web.py配置}{19}{section.6.1}% 
-\contentsline {section}{\numberline {6.2}网页功能}{19}{section.6.2}% 
-\contentsline {subsection}{\numberline {6.2.1}搜索主页}{19}{subsection.6.2.1}% 
-\contentsline {subsection}{\numberline {6.2.2}商品信息陈列}{19}{subsection.6.2.2}% 
-\contentsline {subsection}{\numberline {6.2.3}商品过滤功能}{19}{subsection.6.2.3}% 
-\contentsline {section}{\numberline {6.3}网页美化}{19}{section.6.3}% 
-\contentsline {chapter}{Appendix}{21}{chapter*.3}% 
-\contentsline {chapter}{总结}{23}{chapter*.6}% 
+\contentsline {section}{\numberline {6.2}网页功能的实现}{20}{section.6.2}% 
+\contentsline {subsection}{\numberline {6.2.1}搜索主页}{20}{subsection.6.2.1}% 
+\contentsline {subsection}{\numberline {6.2.2}商品信息陈列}{20}{subsection.6.2.2}% 
+\contentsline {subsection}{\numberline {6.2.3}商品过滤功能}{20}{subsection.6.2.3}% 
+\contentsline {section}{\numberline {6.3}网页美化}{20}{section.6.3}% 
+\contentsline {subsection}{\numberline {6.3.1}Bootstrap框架}{20}{subsection.6.3.1}% 
+\contentsline {chapter}{\numberline {7}项目成果}{21}{chapter.7}% 
+\contentsline {chapter}{Appendix}{23}{chapter*.3}% 
+\contentsline {chapter}{总结}{25}{chapter*.6}% 
