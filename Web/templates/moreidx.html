@@ -19,15 +19,27 @@
 		<div class="row">
 			<div class=".col-md-4 .col-md-offset-4" id="idx">
 				<h1>Search Engine</h1>
-				<form class="form-group" action="/search"
+				<form class="form-group" action="/advancedsearch"
 					  style="padding-bottom:10px;text-align:left;margin-left:30%;margin-right:30%;" method="GET">
 					<form class="form-group">
 						<label for="keyword">KeyWord</label>
 						<input class="form-control" type="text" id="keyword"
 							   name="keyword" placeholder="Input Your Keyword"/>
-						<label for="category">Category</label>
-						<input type="text" class="form-control" id="category"
-							   placeholder="Category" name="category">
+						<label for="category">Brand</label>
+						<input type="text" class="form-control" id="brand"
+							   placeholder="Category" name="brand">
+						<div class="radio">
+						  <label>
+						    <input type="radio" name="website" value="苏宁">
+						    苏宁
+						  </label>
+						</div>
+						<div class="radio">
+						  <label>
+						    <input type="radio" name="website" value="京东">
+						    京东
+						  </label>
+						</div>
 						<button class="btn btn-default" id="Search" name="Search">搜索</button>
 					</form>
 				</form>

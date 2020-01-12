@@ -22,8 +22,32 @@ from org.apache.lucene.search import SortField
 from org.apache.lucene.search import TermQuery
 import jieba
 import re
-import makehash
+from makehash import makeHash_local
 
+def parseCommand(command):
+    '''
+    input: C title:T author:A language:L
+    output: {'contents':C, 'title':T, 'author':A, 'language':L}
+
+    Sample:
+    input:'contenance title:henri language:french author:william shakespeare'
+    output:{'author': ' william shakespeare',
+                   'language': ' french',
+                   'contents': ' contenance',
+                   'title': ' henri'}
+    '''
+    allowed_opt = ['website','brand']
+    command_dict = {}
+    opt = 'title'
+    for i in command.split(' '):
+        if ':' in i:
+            opt, value = i.split(':')[:2]
+            opt = opt.lower()
+            if opt in allowed_opt and value != '':
+                command_dict[opt] = command_dict.get(opt, '') + ' ' + value
+        else:
+            command_dict[opt] = command_dict.get(opt, '') + ' ' + i
+    return command_dict
 
 '''
 field assumption:
@@ -113,6 +137,19 @@ def relativity_search(searcher, analyzer, command):
     query = QueryParser(Version.LUCENE_CURRENT, "title",
                         analyzer).parse(command)
     scoreDocs = searcher.search(query, 150).scoreDocs
+    return read_results(scoreDocs,searcher)
+
+def advanced_search(searcher, analyzer, command):
+    command_dict = parseCommand(command)
+    print command_dict
+    seg_list = jieba.cut(command_dict['title'])
+    command_dict['title'] = (" ".join(seg_list))
+    querys = BooleanQuery()
+    for k,v in command_dict.iteritems():
+        query = QueryParser(Version.LUCENE_CURRENT, k,
+                            analyzer).parse(v)
+        querys.add(query, BooleanClause.Occur.MUST)
+    scoreDocs = searcher.search(query,150).scoreDocs
     return read_results(scoreDocs,searcher)
 
 
@@ -235,24 +272,28 @@ item
 '''
 
 def similarity(det1,det2):
-    det = (det1 - det2).fabs()/255
-    return np.sum(det)
+    #    det = (det1 - det2).fabs()/255
+    #return np.sum(det)
+    return 1
 
 def match_pict(img):
-    with open("../hash.json",'r') as load_f:
+    with open("hash_table.json",'r') as load_f:
         load_list = json.load(load_f)
         hash_val, det = makeHash_local(img)
         hits = load_list[int(hash_val)]
     docs = []
     for hit in hits:
-        docs.append(hit['url'],similarity(hit['det'],det))
-    docs_sorted = sorted(docs,key = lambda kv:(kv[1], kv[0]))
-    res_lis = [i for (i,j) in docs_sorted]
-    print res_lis
-    return res_lis
+        # docs.append((hit,similarity(det,det)))
+        docs.append(hit)
+
+    # docs_sorted = sorted(docs,key = lambda kv:(kv[1], kv[0]))
+    # res_lis = [i for (i,j) in docs_sorted]
+    # print len(res_lis[0])
+    return docs
 
 def pict_search(img):
     urls = match_pict(img)
+    print urls
     STORE_DIR = "FINDEX"
     directory = SimpleFSDirectory(File(STORE_DIR))
     searcher = IndexSearcher(DirectoryReader.open(directory))
@@ -267,9 +308,10 @@ def pict_search(img):
 
 if __name__ == '__main__':
     STORE_DIR = "index"
-    lucene.initVM(vmargs=['-Djava.awt.headless=True'])
-    print 'lucene', lucene.VERSION
-    print search_command("索尼","relativity")
+    # lucene.initVM(vmargs=['-Djava.awt.headless=True'])
+    # print 'lucene', lucene.VERSION
+    # print search_command("索尼","relativity")
+    print match_pict("ttt.png")
     #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
     #directory = SimpleFSDirectory(File(STORE_DIR))
     #searcher = IndexSearcher(DirectoryReader.open(directory))
