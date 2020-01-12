@@ -127,11 +127,6 @@ def relativity_search(searcher, analyzer, command):
     scoreDocs = searcher.search(query,150).scoreDocs
     return read_results(scoreDocs,searcher)
 
-def advanced_search(searcher, analyzer, command):
-    query = command_to_query(command,analyzer)
-    scoreDocs = searcher.search(query,150).scoreDocs
-    return read_results(scoreDocs,searcher)
-
 def command_to_query(command,analyzer):
     command_dict = parseCommand(command)
     print command_dict
