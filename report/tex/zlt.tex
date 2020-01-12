@@ -77,9 +77,47 @@ def rank_search(searcher, analyzer, command):
     # read_results函数提取搜索结果中的必要信息，将在前端部分介绍
 \end{python}
 
-\section{图片匹配}
-
 \section{按图片检索}
+
+\subsection{图片匹配}
+根据我们已经建立的Hash表中包含了网页的URL和直方图特征向量。执行查询时，对输入的图片文件，我们计算图片文件的特征向量，将特征向量通过建表时相同的哈希函数映射到5张哈希表中，由LSH的局部敏感性质，我们认为哈希映射击中单元中的所有元素都和查询query具有一定的相似性。取5张哈希表中击中单元的并集，计算待查询的特征向量与我们存储的特征向量的相似度，就可以按序给出最接近的若干URL。
+
+在查询的过程中，我们仅计算了5个哈希值，并仅对取出的n个元素（n远远小于数据集规模N）计算了匹配度，因此所消耗的时间是与数据集无关的常数时间。此外，由于我们的特征向量已经存放在了哈希表中，因此也可以保证计算匹配度的时间相较数据集规模N是常数的。该查询方式能够在时间上达到理想的效率。
+
+\begin{python}
+# 匹配图片函数
+def match_pict(img):
+    docs = []
+    imgfeat = get_feature_Local(img)             # 计算查询图片的特征向量
+    with open("hash_table.json",'r') as load_f:  # 打开本地哈希表文件
+        load_list = json.load(load_f)
+        for j in range(0,5):
+            hash_val = LSHash(img,proj[j])       # 对查询图片进行哈希映射
+            hits = load_list[int(hash_val)]      # 取出映射结果
+            for hit in hits:
+                elem = hit[0],similarity(imgfeat,hit[1])
+                if elem not in hit:
+                    hit.append(elem)             # 加入待排序集
+    docs_sorted = sorted(docs,key = lambda kv:(kv[1]))
+    res_lis = [i for (i,j) in docs_sorted[:50]]  # 取前50匹配的结果
+    return res_lis                               # 返回50个最匹配的URL条目
+\end{python}
+
+\subsection{匹配条目查询}
+
+上述过程中返回了一个URL列表，注意到URL是区分不同商品信息的标准，因此理论上有了URL就可以将搜索结果呈现在网页中。但不同于其他查询方式中返回包含所有信息的索引文档列表，在这里我们还需要对哈希表返回的URL列表元素在Lucene索引库中再查询，以获得商品的完整信息呈现在网页上，我们采用TermQuery的方式进行查询，如下所示。
+
+\begin{python}
+def pict_search(img):
+    urls = match_pict(img)             # 调用上文match_pict函数执行LSH查询
+    ... # 配置searcher，analyzer
+    res_lis = []
+    for url in urls:
+        query = TermQuery(Term("url",url))   # 调用Lucene的TermQuery查询
+        scoreDocs = searcher.search(query, 1).scoreDocs
+        res_lis += read_results(scoreDocs,searcher)
+    return res_lis                     # 返回的格式与其它查询函数接口一致
+\end{python}
 
 
 \part{Web Front-end}
