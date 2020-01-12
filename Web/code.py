@@ -20,6 +20,7 @@ except:
 urls = (
     '/', 'index',
     '/search', 'search',
+    '/advancedsearch', 'advancedsearch',
     '/moreidx', 'moreidx',
     '/logoidx', 'logoidx',
     '/filter', 'filter',
@@ -56,17 +57,17 @@ class pictsearch:
         if web.input().method == 'logo':
             kw = logo_recognition("static/userupload/tmp")
             vm_env.attachCurrentThread()
-            contents = search_command(kw,'relativity'.decode('utf-8'))
+            contents = search_command(kw,'rank'.decode('utf-8'))
             filtertags = total(contents)
             results = itemlis(contents)
-            return render.result(kw, 'relativity', results, filtertags)
+            return render.result(kw, 'rank', results, filtertags)
         else:
             vm_env.attachCurrentThread()
             contents = pict_search("static/userupload/tmp")
             filtertags = total(contents)
             results = itemlis(contents)
-            return render.result('LSH Match', 'relativity', results, filtertags)
-
+            return render.result('LSH Match', 'rank', results, filtertags)
+'''
 class search:
     def GET(self):
         user_data = web.input()
@@ -77,6 +78,22 @@ class search:
         filtertags = total(contents)           # 统计品牌、属性、特色的结果，即显示在页面左侧所必须的内容
         results = itemlis(contents)   # 要显示在页面右侧的所必需的内容
         return render.result(kw, method, results, filtertags)
+'''
+
+class search:
+    def GET(self):
+        user_data = web.input(website="",brand="")
+        kw = user_data.keyword
+        if user_data.brand:
+            kw += ' brand:%s' %(user_data.brand)
+        if user_data.website:
+            kw += ' website:%s' %(user_data.website)
+        method = web.input(method="relativity").method.decode('utf-8')
+        vm_env.attachCurrentThread()
+        contents = search_command(kw,method)           # 搜索结果
+        filtertags = total(contents)           # 统计品牌、属性、特色的结果，即显示在页面左侧所必须的内容
+        results = itemlis(contents)   # 要显示在页面右侧的所必需的内容
+        return render.result(kw,method, results, filtertags)
 
 class filter:
     def GET(self):
