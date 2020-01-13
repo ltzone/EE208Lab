@@ -2,6 +2,44 @@
 \chapter{图片匹配}
 
 \section{LOGO匹配}
-fsh
+
+在商标识别中，我们实现的功能为用户上传一张图片，返回最匹配的商标的名称。我们建立了一个商标的图片库（logo_recognition/logo_images）以及一个商标索引（brands.txt），对每张上传的图片，逐一与图片库中的图片比较sift特征向量，每个品牌的得分为该品牌下每张图片与待测图片的匹配特征点个数的平均值，最后返回得分最高的品牌。
+
+特征点的选择以及特征向量的计算使用opencv库中的SIFT_create.detectAndCompute函数。
+
+\begin{python}
+detector = cv2.xfeatures2d.SIFT_create() # 特征向量计算使用sift算法
+QueryImgBGR=cv2.imread(img)
+QueryImg=cv2.cvtColor(QueryImgBGR,cv2.COLOR_BGR2GRAY) # 读取图片灰度图
+QueryImg = cv2.GaussianBlur(QueryImg, (3, 3), 0) # 高斯模糊，降点噪点影响
+queryKP,queryDesc=detector.detectAndCompute(QueryImg,None) # queryKP，queryDesc为特征点坐标以及特征向量的列表
+\end{python}
+
+我们使用FlannBasedMatcher寻找最近邻近似匹配，使用knnmatch匹配处理，返回匹配的特征点对,当两特征值的欧式距离小于一定值时视为匹配成功。
+
+\begin{python}
+scores = []
+flannParam = dict(algorithm = 0,tree = 5)
+flann = cv2.FlannBasedMatcher(flannParam,{}) # 最近邻近似匹配
+
+for brand in brands:
+    trainImg = []
+    score = 0.0
+    for filename in glob.glob('logo_images/%s/*' %brand): # 遍历单个品牌图片库中的所有图片，读取图片信息
+        im = cv2.imread(filename,0)
+        im = cv2.GaussianBlur(im, (3,3), 0)
+        trainImg.append(im)
+    for num in range(len(trainImg)):
+        trainKP,trainDesc=detector.detectAndCompute(trainImg[num],None) #获得品牌图片的特征点以及对应sift特征向量信息
+        matches=flann.knnMatch(queryDesc,trainDesc,k=2) # 使用knnmatch匹配，k=2：返回2个DMatch数据类型
+        goodMatch=[]
+        for m,n in matches:
+            if(m.distance<0.75*n.distance): # 计算两对特征值的欧氏距离大小差，此处阈值设为0.75
+                goodMatch.append(m)
+        score = score+ len(goodMatch)
+    scores.append(score/len(trainImg)) # 每个品牌的得分为该品牌图片库特征点匹配个数的平均值
+
+print(brands[scores.index(max(scores))]) # 返回得分最高的品牌
+\end{python}
+
 \section{LSH匹配}
-fsh

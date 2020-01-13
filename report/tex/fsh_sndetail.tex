@@ -1,2 +1,99 @@
 \section{商品信息爬取}
-fsh
+
+我们针对苏宁（https://www.suning.com）中的数码产品信息，总共爬取了3984个商品页面，获取其中的商品名称、页面名称、图片url、品牌等信息。爬虫分为三部分：爬取商品价格、爬取商品基本信息、爬取商品评价Ajax请求url地址。爬虫的架构以及网页信息保存格式参考了上机实验5的网页爬虫以及图片爬虫。
+
+\subsection{爬取商品基本信息}
+
+商品的基本信息包括了网页标题(title)、网页url(url)、商品图片url(imgurl)、商品名称(name)、品牌(brand)、价格(price)、类别(attribute)。
+
+这些信息可以直接在网页源码中找到，用beautifulsoup获取。对于不同商品，图片url地址、商品名称、品牌以及类别信息在网页源码中的位置是固定的，通过查看网页源码可以确定各信息所在的标签的位置。
+
+\begin{python}
+def get_data(content,url,price): # content：网页源码，url：网页url地址，price：商品价格
+    soup = BeautifulSoup(content, features='html.parser')
+    data = dict()
+    imgurl = soup.findAll('a',{'id':'bigImg'})[0]
+    imgurl = complete_url(imgurl.findAll('img')[0].get('src'))
+    name_tag = soup.findAll('span', {'class':'breadcrumb-title'})[0]
+    name = name_tag.get('title')
+    dropdown = soup.findAll('div',{'class':'dropdown'})
+    brand_tag = dropdown[-1].find('a')
+    attribute_tag = dropdown[-2].find('a')
+
+    data['title'] = soup.head.title.text
+    data['url'] = url
+    data['imgurl'] = imgurl
+    data['brand'] = brand_tag.find_all(text=True)[0]
+    data['name'] = name
+    data['attribute'] = attribute_tag.text
+    data['price'] = price
+    return data
+\end{python}
+
+\subsection{爬取商品价格}
+
+我们使用PySide库中的Webkit渲染引擎，在读取网页时会加载所有的动态页面和静态页面。Pyside.QtWebKit读取网页不能多线程进行，因此对苏宁的爬虫采用单线程方式。\footnote{参考博客：https://blog.csdn.net/VictoriaW/article/details/77342421}​
+
+\begin{python}
+class BrowserRender(QWebView):
+    def __init__(self, show=True):
+        try:
+            self.app = QApplication(sys.argv)
+        except:
+            self.app = QCoreApplication.instance()
+        QWebView.__init__(self)
+        if show:
+            self.show()
+
+    def download(self, url, timeout=60): # 读取页面
+        loop = QEventLoop()
+        timer = QTimer()
+        timer.setSingleShot(True)
+        timer.timeout.connect(loop.quit)
+        self.loadFinished.connect(loop.quit)
+        self.load(QUrl(url))
+        timer.start(timeout * 1000)
+        loop.exec_()
+        if timer.isActive():
+            timer.stop()
+            return self.html()
+        else:
+            print "Request time out: " + url
+
+    def find(self, pattern): # 查找页面中信息
+       return self.page().mainFrame().findAllElements(pattern)
+
+try:
+    br.download(page)
+    price = br.find("span.mainprice") # 商品价格在"span.mainprice"类别中
+    price = price[0].toPlainText().encode("utf-8").strip()[2:] # 提取商品价格的数据
+except:
+    print "price error"
+    continue
+\end{python}
+
+\subsection{爬取商品评论Ajax请求的url地址}
+
+苏宁的商品评论以及评价标签通过JavaScript来加载数据，无法在网页源代码中找到，因此我们通过商品评论的Ajax请求地址直接获得商品的评价标签。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/fsh/1.jpg}
+\caption{商品标签Ajax请求的URL}
+\label{fig:fsh_crawler}
+\end{figure}
+
+苏宁的商品评价标签的Ajax请求地址的URL如图\ref{fig:fsh_crawler}所示，url中“30193816-10597918588-0000000000”对应了特定商品的评价标签。通过对网页源代码的查找，我们确定了这串数字为“cluster_id - commodity_id - store_id”的组织形式，cluster_id可以在网页源代码中找到，而commodity_id（商品编号）和store_id（店铺编号）可以在商品页面的url中直接获得。
+
+
+\begin{python}
+def get_comment_id(url,content):
+    ret = urlparse.urlparse(url) # 使用urlparse解析url地址，获得提取url中的店铺编号和商品编号
+    store_id = ret.path[1:11]
+    commodity_id = ret.path[12:-5]
+    content = get_page(url)
+    x = content.find("clusterId") # clusterId位于js脚本中，无法通过beautiful获取，用字符方式在网页源码中搜索
+    cluster_id = content[x+11:x+24]
+    cluster_id = filter(str.isdigit, cluster_id)
+    return '-'.join([cluster_id,commodity_id,store_id])
+\end{python}
