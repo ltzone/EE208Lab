@@ -143,9 +143,69 @@ def pict_search(img):
 \label{fig:zlt_url}
 \end{figure}
 
+在首页中，用户可以选择三种不同的搜索方式，对应三种表单，分别发起不同的request。简单的关键词搜索和支持多字段的高级检索会发起GET请求，将检索query传入上文构建的search函数。
+
+上传图片的操作则会发起POST请求，POST请求首先将用户上传的文件保存到服务端，再根据用户选择的查询方式（LOGO匹配或精确匹配），调用对应的函数，返回响应的结果，处理POST请求的脚本如下所示。
+
+\begin{python}
+class pictsearch:
+    def POST(self):
+        x = web.input(input_img={})
+        filedir = 'static/userupload'
+        if 'input_img' in x:  # to check if the file-object is created
+            fout = open(filedir + '/' + 'tmp', 'wb')
+            # creates the file where the uploaded file should be stored
+            fout.write(x.input_img.file.read())
+            # writes the uploaded file to the newly created file.
+            fout.close()  # closes the file, upload complete.
+        # 将文件保存到本地
+        if web.input().method == 'logo':
+            kw = logo_recognition("static/userupload/tmp")  
+            # 调用SIFT匹配函数，返回匹配的品牌关键词
+            vm_env.attachCurrentThread()
+            contents = search_command(kw,'rank'.decode('utf-8'))
+            filtertags = total(contents)
+            results = itemlis(contents)
+            return render.result(kw, 'rank', results, filtertags)
+        else:
+            vm_env.attachCurrentThread()
+            contents = pict_search("static/userupload/tmp")
+            # 调用LSH检索函数，返回匹配列表
+            filtertags = total(contents)
+            results = itemlis(contents)
+            return render.result('LSH Match', 'rank', results, filtertags)
+\end{python}
+
+
+无论是针对关键词还是图片的search函数，返回值均为一个包含所有检索匹配文档的列表，该列表会作为构造结果页模板的主要参数，决定结果页中的内容。结果页中也包含一个搜索表单和过滤选项，因此也可以发起搜索或过滤的GET请求，再次调用search或filter函数，刷新结果页的内容。
+
 \section{网页功能的实现}
 
 \subsection{搜索主页}
+
+搜索主页如图\ref{fig:zlt_index1}、\ref{fig:zlt_index2}、\ref{fig:zlt_index3}所示
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/zlt/searchidx1.png}
+\caption{单关键词查询首页}
+\label{fig:zlt_index1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/zlt/searchidx2.png}
+\caption{图片查询首页}
+\label{fig:zlt_index2}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/zlt/searchidx3.png}
+\caption{多字段查询首页}
+\label{fig:zlt_index3}
+\end{figure}
 
 \subsection{商品信息陈列}
 
