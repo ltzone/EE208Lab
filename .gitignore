@@ -1,3 +1,10 @@
+*.aux
+*.log
+*.gz
+*.pdf
+*.toc
+*.exe
+*.out
 .idea/
 Crawler/Fi-html/
 Crawler/Fi-index.txt
