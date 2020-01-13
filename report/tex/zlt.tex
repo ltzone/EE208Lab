@@ -292,6 +292,8 @@ def total(contents):
     return [brand_tags,category_tags,feature_tags,source_tags]
 \end{python}
 
+以上，我们就完成了过滤标签的统计和生成，total函数的返回值将会作为结果页模板生成网页的参数之一。
+
 
 \subsection{标签选项陈列}
 
@@ -307,10 +309,11 @@ $for branditem in filtertags[0]:
     $ count += 1
 \end{python}
 
+注意到此处会根据filtertags中的内容执行for循环，生成name同为brand，但value值不同的checkbox元素供用户勾选。
+
 \subsection{标签过滤请求}
 
 用户在页面左侧勾选需要的选项后，表单将会发出名为filter的GET请求。web.py对该请求的处理过程如下所示。
-
 
 \begin{python}
 class filter:
@@ -344,15 +347,7 @@ def match_item(item,categorys,features,brands,sources):
         return False
     return True
 
-def match_item_feature(item,properties,property_name):
-    # 与其他属性不同，特色取交集
-    if (not properties):
-        return True
-    for proper in properties:
-        if proper not in item[property_name].keys():
-            return False
-    return True
-
+# 检查商品属性是否符合勾选选项的并集
 def match_item_one(item,properties,property_name):
     if (not properties):
         return True
@@ -362,16 +357,18 @@ def match_item_one(item,properties,property_name):
     return False
 \end{python}
 
-
-
-
+用户在勾选品牌、分类这些互不相交的属性时，往往希望得到满足单个勾选选项条目的并集，但用户在勾选商品特征时，往往希望得到同时满足所有勾选条目（交集）的商品。因此商品特征的匹配需要另写函数进行完成。在这一阶段，对标签过滤的请求虽然接口一致，但也要分别构造符合实际需求的函数完成。
 
 \section{商品信息陈列}
+
+商品页面的生成需要传入以下四个模板参数，关键词、检索方式、搜索结果和前一节中已介绍的filtertags。前两者将会作为页面的标题、表单隐藏参数呈现在网页中。
 
 \begin{python}
 # 网页模板参数
 def with (kw,method,contents,filtertags)
 \end{python}
+
+注意到Lucene检索函数返回的是一个scoreDocs对象，因此我们首先要从中提取出对应的信息存储成Python内置的数据结构。我们通过read\_results函数实现这一功能。对不同的字段，我们也要采取分词/合并分词、循环遍历等对应各字段本身特性的操作完成。
 
 \begin{python}
 # 读取商品信息
@@ -383,23 +380,7 @@ def read_results(scoreDocs, searcher):
         doc = searcher.doc(scoreDoc.doc)
         item = dict()
         item['imgurl'] = doc.get("imgurl").strip()
-        item['url'] = doc.get("url").strip()
-        item['title'] = "".join(doc.get("title").split())
-        item['brand'] = doc.get("brand")
-        item['price'] = doc.get("price")
-        item['rank'] = doc.get("score")
-        item['category'] = doc.get("attribute")
-        item['source'] = doc.get("website")
-
-        # 商品具体属性
-        itemdet = dict()
-        detseg = doc.get("detail").split('\t')
-        for detail in detseg:
-            detailseg = detail.split(':')
-            if len(detail)>1:
-                itemdet[detailseg[0]]=detailseg[1]
-        item['detail'] = itemdet
-
+        ... # 其他字段的提取
         # 商品评价tag
         itemfeat = dict()
         featseg = re.split(' ',doc.get("tag"))
@@ -412,19 +393,12 @@ def read_results(scoreDocs, searcher):
     return res_lis
 \end{python}
 
+上文返回的res\_lis对象将会在模板页面中被for结构遍历，依次输出，实现搜索结果的陈列。
 
 
-\begin{python}
-# 陈列商品信息
-$def showdetails(details):
-	<dl class="dl-horizontal">
-	$for detail in (details):
-		<dt>$(detail)</dt><dd>$(details[detail])</dd>
-	</dl>
-$def showfeatures(features):
-	$for feature in (features):
-		<button type="button" class="btn btn-default btn-sm">$(feature) ($(features[feature]))</button>
-\end{python}
+\section{翻页功能}
+
+在原本for结构输出contents的结构中，我们增加了一个页面分区的计数和输出，每一个分区会依次囊括10条商品。
 
 \begin{python}
 <div class='result_contents'>
@@ -435,59 +409,49 @@ $def showfeatures(features):
 			$if (count%10 == 1):
 				$ pagecount += 1
 				<div id='page$(pagecount)' style="display: none;">
+				# 每十个项目输出一个</div>标签，默认不显示
 			<div class='row'>
 				<div class='res' id='res$(count)'>
 					<div class='col-md-3'>
-						<a class='thumbnail' href='$(item["url"])'>
-							<img class='img-responsive' src='$(item["imgurl"])' alt='$(item["title"])'>
-						</a>
+					... # 输出图片
 					</div>
 					<div class='col-md-9'>
-						<div class='row'>
-							<a class="thumbnail" href='$(item["url"])'>
-							<h3 style="width: 90%;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;">
-								$(item["title"])
-							</h3>
-							</a>
-						</div>
-						<div>
-							<div class="col-md-4">
-								<h4 class="price">￥ $("{:.2f}".format(int(item["price"])/100)) </h4>
-								<p class="attributes"> $(item["category"]), $(item["brand"]), 评分 $(item["rank"])
-								</p>
-							<div>
-								$:showfeatures((item["feature"]))
-							</div>
-							</div>
-							<div class="col-md-8">
-								$:showdetails((item["detail"]))
-							</div>
-						</div>
-						
+					... # 输出商品信息	
 					</div>
 				</div>
 			</div>
-			$:pageend1(count)
-		$:pageend2(count)
-	</div>
+			$if (count%10 == 0): # 每十个项目输出一个</div>标签
+				</div> <!-- end of page$(count/10)-->
+		$if (count%10 != 0):  # 输出最后一个</div>标签
+			</div> <!-- end of page$(count/10)-->
+</div>
 \end{python}
 
-打印出了pageend的标签，这会在下一节介绍。
+在页面底部，我们加上如下的翻页按钮。这是通过Bootstrap内置的样式库实现的。按钮的超链接是一段js代码，调用了每个按钮对应的翻页js函数。
 
-\section{翻页功能}
-
-打印pageend标签，实现分区
 \begin{python}
-$def pageend1(count):
-	$if (count%10 == 0):
-		</div> <!-- end of page$(count/10)-->
-
-$def pageend2(count):
-	$if (count%10 != 0):
-		</div> <!-- end of page$(count/10)-->
+<div id="pageturn">
+	<nav aria-label="Page navigation">
+	  <ul class="pagination pagination-lg">
+	    <li id="begin">    # 跳转到第一页
+	      <a  href="javascript:start()" aria-label="Start">
+	        <span aria-hidden="true">&laquo;</span>
+	      </a>
+	    </li>              # 跳转到第i+1页
+		$for i in range(pagecount):
+			<li id="pg$(i+1)"><a href="javascript:pg$(i+1)()">$(i+1)</a></li>
+	    <li id="end">      # 跳转到最后一页
+	      <a  href="javascript:end()" aria-label="End">
+	        <span aria-hidden="true">&raquo;</span>
+	      </a>
+	    </li>
+	  </ul>
+	</nav>
+</div>
 \end{python}
 
-初始化
+
+当页面刚加载时，我们希望默认第一页是展示的，也就是page1分区的display属性不是none，第一个翻页标签是激活的。因此我们在HTML文档中加入如下的js代码。
 
 \begin{python}
 <script type="text/javascript">
@@ -499,33 +463,11 @@ $def pageend2(count):
 </script>
 \end{python}
 
+以中间翻页按钮的js函数为例，它会实现当前页面的显示、其他页面的隐藏和当前页面标签的激活。js代码如下所示。
+
 \begin{python}
 # 按钮的JavaScript函数
 var pages = $(pagecount);
-function start()
-{
-	var pages = $(pagecount);
-	document.getElementById("page1").style.display="";
-	for (var it=2;it<=pages;++it)
-	{
-		var itit="page"+it.toString();
-		document.getElementById(itit).style.display="none";
-		document.getElementById("pg"+it.toString()).setAttribute("class","");
-	}
-	document.getElementById("pg1").setAttribute("class","active");
-}
-function end()
-{
-	var pages = $(pagecount);
-	for (var it=1;it<pages;++it)
-	{
-		var itit="page"+it.toString();
-		document.getElementById(itit).style.display="none";
-		document.getElementById("pg"+it.toString()).setAttribute("class","");
-	}
-	document.getElementById("page"+pages.toString()).style.display="";
-	document.getElementById("pg"+pages.toString()).setAttribute("class","active");
-}
 $for i in range(pagecount):
 	function pg$(i+1)()
 	{
@@ -534,13 +476,18 @@ $for i in range(pagecount):
 			var itit="page"+it.toString();
 			document.getElementById(itit).style.display="none";
 			document.getElementById("pg"+it.toString()).setAttribute("class","");
-		}
-		document.getElementById("page$(i+1)").style.display="";
-		document.getElementById("pg$(i+1)").setAttribute("class","active");
+		}  # 隐藏所有页面
+		document.getElementById("page$(i+1)").style.display="";  # 显示当前页面
+		document.getElementById("pg$(i+1)").setAttribute("class","active"); # 激活当前label
+		
 	}
 \end{python}
 
+以上就是我们前端搭建的所有主要实现功能的介绍。
+
 \chapter{项目成果}
+
+本章节将会通过截图的方式集中展示各主要功能。
 
 \section{单关键词检索效果}
 
@@ -588,4 +535,53 @@ $for i in range(pagecount):
 
 \section{logo匹配}
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=4.5cm]{img/zlt/test1.jpg}
+\caption{测试图片1}
+\label{fig:zlt_test1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=14.5cm]{img/zlt/pictmatch1_1.png}
+\caption{测试图片1的搜索结果}
+\label{fig:zlt_pictmatch1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=14.5cm]{img/zlt/pictmatch1_2.png}
+\caption{测试图片1的后台匹配过程}
+\label{fig:zlt_pictmatch1_2}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=4.5cm]{img/zlt/test2.jpeg}
+\caption{测试图片2}
+\label{fig:zlt_test2}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=14.5cm]{img/zlt/pictmatch2_1.png}
+\caption{测试图片2的搜索结果}
+\label{fig:zlt_pictmatch1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=14.5cm]{img/zlt/pictmatch2_2.png}
+\caption{测试图片2的后台匹配过程}
+\label{fig:zlt_pictmatch2_2}
+\end{figure}
+
 \section{图片LSH匹配}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=14.5cm]{img/zlt/LSH.png}
+\caption{LSH匹配实例}
+\label{fig:zlt_LSH}
+\end{figure}
