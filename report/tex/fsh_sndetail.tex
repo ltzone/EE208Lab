@@ -83,7 +83,7 @@ except:
 \label{fig:fsh_crawler}
 \end{figure}
 
-苏宁的商品评价标签的Ajax请求地址的URL如图\ref{fig:fsh_crawler}所示，url中“30193816-10597918588-0000000000”对应了特定商品的评价标签。通过对网页源代码的查找，我们确定了这串数字为“cluster_id - commodity_id - store_id”的组织形式，cluster_id可以在网页源代码中找到，而commodity_id（商品编号）和store_id（店铺编号）可以在商品页面的url中直接获得。
+苏宁的商品评价标签的Ajax请求地址的URL如图\ref{fig:fsh_crawler}所示，url中“30193816-10597918588-0000000000”对应了特定商品的评价标签。通过对网页源代码的查找，我们确定了这串数字为“cluster\_id - commodity\_id - store\_id”的组织形式，cluster\_id可以在网页源代码中找到，而commodity\_id（商品编号）和store\_id（店铺编号）可以在商品页面的url中直接获得。
 
 
 \begin{python}

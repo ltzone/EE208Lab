@@ -3,9 +3,9 @@
 
 \section{LOGO匹配}
 
-在商标识别中，我们实现的功能为用户上传一张图片，返回最匹配的商标的名称。我们建立了一个商标的图片库（logo_recognition/logo_images）以及一个商标索引（brands.txt），对每张上传的图片，逐一与图片库中的图片比较sift特征向量，每个品牌的得分为该品牌下每张图片与待测图片的匹配特征点个数的平均值，最后返回得分最高的品牌。
+在商标识别中，我们实现的功能为用户上传一张图片，返回最匹配的商标的名称。我们建立了一个商标的图片库（logo\_recognition/logo\_images）以及一个商标索引（brands.txt），对每张上传的图片，逐一与图片库中的图片比较sift特征向量，每个品牌的得分为该品牌下每张图片与待测图片的匹配特征点个数的平均值，最后返回得分最高的品牌。
 
-特征点的选择以及特征向量的计算使用opencv库中的SIFT_create.detectAndCompute函数。
+特征点的选择以及特征向量的计算使用opencv库中的SIFT\_create.detectAndCompute函数。
 
 \begin{python}
 detector = cv2.xfeatures2d.SIFT_create() # 特征向量计算使用sift算法
