@@ -32,7 +32,7 @@ def get_data(content,url,price): # content：网页源码，url：网页url地�
 
 \subsection{爬取商品价格}
 
-我们使用PySide库中的Webkit渲染引擎，在读取网页时会加载所有的动态页面和静态页面。Pyside.QtWebKit读取网页不能多线程进行，因此对苏宁的爬虫采用单线程方式。
+我们使用PySide库中的Webkit渲染引擎，在读取网页时会加载所有的动态页面和静态页面。Pyside.QtWebKit读取网页不能多线程进行，因此对苏宁的爬虫采用单线程方式。\footnote{参考博客：https://blog.csdn.net/VictoriaW/article/details/77342421}​
 
 \begin{python}
 class BrowserRender(QWebView):
