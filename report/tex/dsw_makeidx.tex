@@ -1,2 +1,92 @@
 \chapter{构建索引}
-dsw
+在获取了商品属性、用户评价、商品打分等内容并分别将其储存在文本文件中后，我们接下来就可以利用Lucene建立索引了。由于京东和苏宁的商品信息都是这三类并且以相同的格式存储，我们接下来以京东为例解释建立索引的过程。
+
+与本学期第五次试验建立Lucene索引的过程类似，首先我们打开一个储存有所有商品网址和文件名的文本，逐行读取商品URL和文件名，并从detail、 comment、score三个文件夹中找到储存该网页对应信息的三个文本。分别打开这三个文本文件，读取其中内容并进行合适的格式处理，最终添加为field。
+
+以下是可供挑选的一些fieldtype：
+\begin{python}
+t1 = FieldType()
+        t1.setIndexed(True)
+        t1.setStored(True)
+        t1.setTokenized(True)
+        t1.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS)
+
+        t2 = FieldType()
+        t2.setIndexed(True)
+        t2.setStored(False)
+        t2.setTokenized(True)
+        t2.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS)
+
+        t3 = FieldType()
+        t3.setIndexed(False)
+        t3.setStored(True)
+        t3.setTokenized(False)
+        t3.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS)
+
+        t4 = FieldType()
+        t4.setIndexed(True)
+        t4.setStored(True)
+        t4.setTokenized(False)
+        t4.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS)
+\end{python}
+
+需要注意的一些field有：
+（1）价格“price”和打分“score”。前者从保存“detail”的文本中获取，后者则专门保存在“score”由文本中。由于这两样内容需要进行后续的数值比较，我们不能将其与其他field 一样以“str” 形式建立，而要将之转换为long的格式，并建立longfield。以“score”为例：
+
+\begin{python}
+path3="new/score/" + filename2 + ".txt"
+ff3 = open(path3)
+line = ff3.readline().strip()
+score = int(line.split('\t')[1])        #截取score
+scoree = long(score)                    #转换为long型数
+doc.add(LongField('score', scoree, Field.Store.YES)) #建立longfield，设为可存储
+\end{python}
+
+
+（2）商品标题（即商品简述）“title”。为了后续的检索，我们这里需要利用SimpleAnalyzer以及jieba分词库对其进行分词处理，并允许indexed、stored、tokenized。
+
+最终，我们根据实际需要以不同的fieldtype对商品建立了以下field：
+
+	“url”:商品页网址
+	“price”：商品价格
+	“score”：商品打分
+	“path”：存储路径
+	“imgurl”:商品图片地址
+	“title”：商品网页标题，即商品信息概述
+	“name”:商品名称
+	“brand”:商品品牌
+	“attribute”：商品类别
+	“detail”：其余商品信息
+	“tag”:用户评价
+	“website”：电商类别（苏宁或京东）
+
+代码如下（以京东为例）：
+
+\begin{python}
+                                doc.add(Field('url', url.strip(), t4))
+                                doc.add(LongField('price',pricee,Field.Store.YES))
+                                print 'add price', int(100*float(ll[5])),'\n'
+                                doc.add(LongField('score', scoree, Field.Store.YES))
+                                print 'add score', scoree, '\n'
+                                doc.add(Field('path', path, t3))
+                                print 'add path', path, '\n'
+                                doc.add(Field('imgurl', ll[2], t3))
+                                print 'add imgurl', ll[2], '\n'
+                                doc.add(Field('title', analysis(ll[0]), t1))
+                                print 'add title', analysis(ll[0]), '\n'
+                                doc.add(Field('name', ll[3], t3))
+                                print 'add name', ll[3], '\n'
+                                doc.add(Field("brand", ll[4], t1))
+                                print 'add brand', ll[4], '\n'
+                                doc.add(Field("attribute", ll[6], t3))
+                                print 'add attribute', ll[6], '\n'
+                                doc.add(Field("detail", ll[7], t3))
+                                print 'add detail', ll[7], '\n'
+                                doc.add(Field("tag", tag, t3))
+                                print 'add tag', tag, '\n'
+                                doc.add(Field("website","京东",t4))
+                                print 'add website',"京东",'\n'
+\end{python}
+
+苏宁商品信息的索引建立过程与之类似。
+至此，索引就建立完毕了。具体代码见文件“makeindex.py”。
