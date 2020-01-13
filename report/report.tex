@@ -44,6 +44,30 @@
 
 \chapter{前言}
 
+本项目是本组同学经过一学期电类工程导论的学习，将网络爬虫、信息提取、索引查询、图像特征提取等知识和技能的整合和应用到一起，通过大作业的方式呈现的学习成果，实现了一个集成的电子产品商品搜索引擎。本项目的特色如下：
+\begin{kaishu}
+\begin{itemize}
+\item 包含了3984条来源于苏宁易购的电子产品和6960条来源于京东的电子产品条目信息
+\item 支持关键词检索、多字段检索
+\item 支持图片匹配，提供LOGO识别和精确匹配两种模式
+\item 支持对检索结果的价格、评分排序
+\item 支持对检索结果的品牌、类别、特征、来源进行过滤
+\item 提供基于商品评论数、评论标签的评分机制
+\item 在搜索引擎中提供商品的部分具体信息
+\end{itemize}
+\end{kaishu}
+
+在本项目的开发过程中，我们利用到了以下工具、框架和平台
+\begin{kaishu}
+\begin{itemize}
+\item 基于Lucene搭建的索引和搜索引擎
+\item 基于Web.py运行的前端框架
+\item 基于Bootstrap的前端排版和美化
+\item 基于Pyside.QtWebKit的网页提取工具
+\end{itemize}
+\end{kaishu}
+
+本报告中将介绍本项目中主要功能的实现、效果和分析，本项目的源代码可以在GitHub\footnote{https://github.com/ltzone/EE208Lab}中获取。
 
 \mainmatter
 
@@ -60,7 +84,6 @@
 
 
 \chapter{苏宁爬虫}
-\input{tex/yhb_sncrawler.tex}
 \input{tex/fsh_sndetail.tex}
 \input{tex/yhb_sntagscore.tex}
 
@@ -77,13 +100,10 @@
 \input{tex/zlt.tex}
 \backmatter
 
-\chapter{Appendix}
-
-\section*{写作分配}
-
-\section*{Acknowledgements}
 
 \chapter{总结}
+
+本项目在完成大作业基本要求的基础上，实现了基于商品评论内容估计商品质量，并实现基于商品评价的排序，实现了基于logo图像的搜索，并且在前端做了良好的整合，建立了一个具有一定规模，完整度较高的电子产品集成搜索引擎。尽管由于时间和精力所限，本项目中还存在许多有待优化和改进的地方，但这会是我们未来进一步学习和努力的方向。最后感谢老师与助教在这一学期辛勤的指导和付出！
 
 \end{document}
 

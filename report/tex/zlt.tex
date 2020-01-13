@@ -128,7 +128,7 @@ def pict_search(img):
 
 \section{web.py配置}
 
-网站前端的URL结构如图\ref{fig:structure}所示。
+网站前端的URL结构如图\ref{fig:zlt_url}所示。
 
 \begin{figure}[htbp]
 \centering
@@ -217,26 +217,24 @@ body {
 </form>
 \end{python}
 
-最终搜索主页的效果如图\ref{fig:zlt_index1}、\ref{fig:zlt_index2}、\ref{fig:zlt_index3}所示。
-
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=9.5cm]{img/zlt/searchidx1.png}
+\includegraphics[width=13.5cm]{img/zlt/searchidx1.png}
 \caption{单关键词查询首页}
 \label{fig:zlt_index1}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=9.5cm]{img/zlt/searchidx2.png}
+\includegraphics[width=13.5cm]{img/zlt/searchidx2.png}
 \caption{图片查询首页}
 \label{fig:zlt_index2}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=9.5cm]{img/zlt/searchidx3.png}
+\includegraphics[width=13.5cm]{img/zlt/searchidx3.png}
 \caption{多字段查询首页}
 \label{fig:zlt_index3}
 \end{figure}
@@ -485,6 +483,8 @@ $for i in range(pagecount):
 
 \section{单关键词检索效果}
 
+首先，对简单的关键词检索效果如图\ref{fig:zlt_result1}所示。对该结果，用户可以选择价格排序、评价排序进行呈现，如图\ref{fig:zlt_high_rank}、\ref{fig:zlt_decreasing_price}所示。
+
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=13.5cm]{img/zlt/result1.png}
@@ -506,7 +506,10 @@ $for i in range(pagecount):
 \label{fig:zlt_high_rank}
 \end{figure}
 
-<<<<<<< HEAD
+\section{翻页与过滤}
+
+在结果页，结果以分页的形式呈现，页面底部设有分页标签，如图\ref{fig:zlt_leaf_flip}所示。用户可以通过顶部的搜索框执行其他关键词的搜索，也可以通过勾选页面左侧表单对当前关键词的搜索结果进行过滤，如图\ref{fig:zlt_filter1}所示的勾选结果会跳转至图\ref{fig:zlt_filter1_result}的结果页。
+
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=13.5cm]{img/zlt/leafflip.png}
@@ -528,14 +531,25 @@ $for i in range(pagecount):
 \label{fig:zlt_filter1_result}
 \end{figure}
 
-\section{logo匹配}
+\section{LOGO匹配}
+
+如果在如图\ref{fig:zlt_index2}所示的首页上传图片，勾选Logo Match选项，则前端会调用SIFT匹配函数返回最可能匹配的品牌名执行搜索。本节展示了两个例子。对图\ref{fig:zlt_test1}的输入，后台匹配的结果如图\ref{fig:zlt_pictmatch1_2}所示，前端返回的结果页如图\ref{fig:zlt_pictmatch1}所示。对图\ref{fig:zlt_test2}的输入，后台匹配的结果如图\ref{fig:zlt_pictmatch2_2}所示，前端返回的结果页如图\ref{fig:zlt_pictmatch2}所示。均达到了理想的匹配效果。事实上，经测试，对Logo位于照片显著部位拍摄的实景电子产品照片，我们的Logo Match功能均能达到理想的匹配效果。
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=4.5cm]{img/zlt/test1.jpg}
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[height=3cm]{img/zlt/test1.jpg}
 \caption{测试图片1}
 \label{fig:zlt_test1}
-\end{figure}
+\end{minipage}
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[height=5cm]{img/zlt/pictmatch1_2.png}
+\caption{测试图片1的后台匹配过程}
+\label{fig:zlt_pictmatch1_2}
+\end{minipage}
+\end{figure} 
 
 \begin{figure}[htbp]
 \centering
@@ -543,40 +557,38 @@ $for i in range(pagecount):
 \caption{测试图片1的搜索结果}
 \label{fig:zlt_pictmatch1}
 \end{figure}
-
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=14.5cm]{img/zlt/pictmatch1_2.png}
-\caption{测试图片1的后台匹配过程}
-\label{fig:zlt_pictmatch1_2}
-\end{figure}
-
-\begin{figure}[htbp]
+\begin{minipage}[t]{0.48\textwidth}
 \centering
-\includegraphics[width=4.5cm]{img/zlt/test2.jpeg}
+\includegraphics[height=3cm]{img/zlt/test2.jpeg}
 \caption{测试图片2}
 \label{fig:zlt_test2}
-\end{figure}
+\end{minipage}
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[height=5cm]{img/zlt/pictmatch2_2.png}
+\caption{测试图片2的后台匹配过程}
+\label{fig:zlt_pictmatch2_2}
+\end{minipage}
+\end{figure} 
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=14.5cm]{img/zlt/pictmatch2_1.png}
 \caption{测试图片2的搜索结果}
-\label{fig:zlt_pictmatch1}
+\label{fig:zlt_pictmatch2}
 \end{figure}
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=14.5cm]{img/zlt/pictmatch2_2.png}
-\caption{测试图片2的后台匹配过程}
-\label{fig:zlt_pictmatch2_2}
-\end{figure}
 
 \section{图片LSH匹配}
 
+如果在如图\ref{fig:zlt_index2}所示的首页上传图片，勾选Accurate Match选项，则前端会前往哈希索引表中寻找匹配的图片，计算匹配度输出匹配的商品项目。实验表明对于颜色较为明显的图片，我们的LSH匹配可以达到良好的匹配效果，如图\ref{fig:zlt_LSH}所示。
+
+
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=14.5cm]{img/zlt/LSH.png}
+\includegraphics[width=10.5cm]{img/zlt/LSH.png}
 \caption{LSH匹配实例}
 \label{fig:zlt_LSH}
 \end{figure}

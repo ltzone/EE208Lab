@@ -3,7 +3,7 @@
 
 接下来，为获取每件商品的详细信息，我们逐行读取该文本，通过打开每件商品网页的网址，结合beautifulsoup从content内容中截取我们需要的部分，并将其写入用来储存每件商品的具体信息的文本中。注意到京东旗下绝大部分商品网页的html布局都是相似的，我们可以通过定位固定的tag节点，并用“id”、“class”等属性加以限制，从而获取每一个商品网页中同一种商品信息的位置，完成爬取。
 
-例如：我们观察到所有描述商品的图片地址在html中都保存在如图\ref{img:dsw1}所示的“img”标签下的“data-origin”类中，因此我们可以根据这一特点定位图片url的储存位置，利用find\_all（）、get（）等语句获取信息，并以读写方式将其写入文本文件中。
+例如：我们观察到所有描述商品的图片地址在html中都保存在如图\ref{img:dsw1}所示的“img”标签下的“data-origin”类中，因此我们可以根据这一特点定位图片url的储存位置，利用find\_all()、get()等语句获取信息，并以读写方式将其写入文本文件中。
 
 \begin{figure}[htbp]
 \centering
@@ -26,18 +26,18 @@
             f3.write('\n')
 \end{python}
 
-其余商品属性的获取与之类似，比如在“class”为“parameter2 p-parameter-list”的“ul”标签下读取如图\ref{img:dsw2}所示的文本内容，我们可以获得如图\ref{img:dsw3}所示的商品属性：
-
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=10.5cm]{img/dsw/dsw2.png}
+\includegraphics[width=8.5cm]{img/dsw/dsw2.png}
 \caption{部分商品信息的获取}
 \label{img:dsw2}
 \end{figure}
 
+其余商品属性的获取与之类似，比如在“class”为“parameter2 p-parameter-list”的“ul”标签下读取如图\ref{img:dsw2}所示的文本内容，我们可以获得如图\ref{img:dsw3}所示的商品属性：
+
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{img/dsw/dsw3.png}
+\includegraphics[width=10.5cm]{img/dsw/dsw3.png}
 \caption{部分商品信息}
 \label{img:dsw3}
 \end{figure}
