@@ -25,7 +25,7 @@ import jieba as jb
 #导入结巴分词(关键词提取)
 import jieba.analyse
 
-f=open("index_sn_part4.txt", 'r')
+f=open("index_sn_part6.txt", 'r')
 
 #设置请求中头文件的信息
 headers = {'User-Agent':'Mozilla/5.0 '
@@ -47,7 +47,7 @@ def crawl_sn_cmt_tag(sku, shop):# change for url
         r"-----satisfy.htm?".format(sku,shop)
     comment_tag_path = r'C:\TC-prog\JetBrain_pycharm_TC' \
                        r'\PycharmProjects\Crawler_EEFinal' \
-                       r'\sn_cmt_SCORE\httpproduct.suning.com{}{}.html.txt'.format(sku,shop)
+                       r'\sn_cmt_SCORE\httpproduct.suning.com{}{}.html.txt'.format(shop, sku)
 
     try:
         r=requests.get(url,headers=headers,timeout=5)
@@ -109,7 +109,8 @@ def run():
             shop = itemID[:-11]
             sku = itemID[10:]
             print(shop, sku)
-
+            while(len(sku)<11):
+                sku="0"+sku
             crawl_sn_cmt_tag(sku, shop)
             time.sleep(random.random() * 2)
         except:
