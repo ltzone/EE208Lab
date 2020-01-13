@@ -27,7 +27,14 @@ url=r"https://review.suning.com/ajax/" \
 
 先不说找这个url是一个很费工的事情，我们在如何处理“32762695“这串数字上纠结了一段时间——它并不代表商品的某种属性。后来想得更直接了一点：”既然没有关系，就把它当作都可以用的吧“，像对待京东商品ID前面那一串一样处理即可。事实证明，这种做法是有效的。
 
-在调用json库转换对象之后，面临的问题就和之前在京东解决过的一模一样了。对京东标签的代码稍加修改即可。爬取结果示例如下\ref{img:yhb100}：
+在调用json库转换对象之后，面临的问题就和之前在京东解决过的一模一样了。对京东标签的代码稍加修改即可。此外，需要注意有的商品ID不足11位，需要进行补足：
+\begin{python}
+while (len(sku) < 11):
+                sku = "0" + sku
+\end{python}
+
+
+爬取结果示例如下\ref{img:yhb100}：
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=13.5cm]{img/yhb/sn_res1.png}
