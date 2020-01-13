@@ -249,14 +249,87 @@ body {
 
 \section{商品过滤功能}
 
-我们的项目支持对搜索出来的结果进行过滤。
+我们的项目支持对搜索出来的结果进行过滤。过滤的对象包括商品品牌、商品类别、商品特征和商品来源。在大量商品的索引库中，直接统计所有商品的标签是难以实现的。因此，我们的解决方法是针对用户搜索返回的结果进行标签的统计和过滤。当用户发出search的请求后，网页在返回结果列表的同时，还会统计出结果商品的品牌、类别和特征，显示在网页的左侧，作为用户标签过滤的选项。
 
-
+当用户在网页左侧的过滤中勾选了需要的选项，点击提交按钮后，网页会发出filter请求，网页将再次执行搜索，将搜索结果与用户勾选的选项匹配，在网页中返回筛选后的商品列表。下文我们将分节阐述该功能的具体实现。
 
 
 \subsection{统计商品标签}
 
-返回filtertags标签供左侧栏使用
+首先，针对search函数返回的商品列表，我们需要遍历contents列表，根据brand、category、feature等字段的组织形式统计所有可能出现的标签数，记录在一个dict中。随后，我们编写了一个sort\_and\_filter函数，对dict中的统计数从高到低排序。我们取排序前n个结果作为输出filtertags。这些选项将会出现在网页左侧供用户筛选。以下是sort\_and\_filter函数的脚本
+
+
+\begin{python}
+# 标签的统计与排序
+def sort_and_filter(x_count,length):
+    x_tuple = zip(x_count.keys(),x_count.values())
+    x_sorted = sorted(x_tuple,key = lambda kv:(-kv[1], kv[0]))
+    # 调用python内置的sorted方法对[(key,occurences)]列表进行排序
+    filtered_x = x_sorted[:length]
+    return filtered_x
+\end{python}
+
+以下是统计并返回tags的函数脚本，此处仅以brand为例。注意到实际中category、feature往往由多个字段组成，因此我们需要根据不同的字段采取不同的统计方法。
+
+\begin{python}
+def total(contents):
+    # 返回三个参数的tuple，三个长度最长为n的[(key,num)]列表，分别是brand，category和feature的tag
+    brand_count = dict()
+    ...
+    for item in contents:
+        item = json.loads(item)
+        brand = item['brand']
+        ...
+        if not brand_count.has_key(brand):
+            brand_count[brand] = 0
+        brand_count[brand] += 1
+        ...
+    # 以brand tags为例，统计过程如下。
+    brand_tags = sort_and_filter(brand_count,5)
+    category_tags = sort_and_filter(category_count,5)
+    source_tags = sort_and_filter(source_count,2)
+    feature_tags = sort_and_filter(feature_count,10)
+    return [brand_tags,category_tags,feature_tags,source_tags]
+\end{python}
+
+
+\subsection{标签选项陈列}
+
+根据上文返回的filtered\_tags，我们采取web.py中的for循环结构将标签作为表单的选项呈现在结果页左侧。对应的模板代码如下所示，我们仍然以brand为例。
+
+\begin{python}
+<h4 class="filter-title">品牌</h4>
+$ count = 0
+$for branditem in filtertags[0]:
+    <label class="checkbox">
+        <input type="checkbox" name="brand" id="brand$(count)" value="$(branditem[0])"> $(branditem[0])($(branditem[1]))
+    </label>
+    $ count += 1
+\end{python}
+
+\subsection{标签过滤请求}
+
+用户在页面左侧勾选需要的选项后，表单将会发出名为filter的GET请求。web.py对该请求的处理过程如下所示。
+
+
+\begin{python}
+class filter:
+    def GET(self):
+        user_data = web.input()
+        kw = user_data.keyword
+        method = web.input(method="relativity").method.decode('utf-8')
+        category = web.input(category=[]).category
+        ... # 获取表单信息
+        vm_env.attachCurrentThread()
+        contents = search_command(kw,method) # 搜索结果
+        filtertags = total(contents) # 统计品牌、属性、特色的结果，即显示在页面左侧所必须的内容
+        filtered_contents = tag_filter(contents,category,features,brand,source)
+                                     # 对搜索结果作筛选
+        results = itemlis(filtered_contents) # 根据筛选结果提取出要显示在页面右侧的所必需的内容
+        return render.result(kw, method, results, filtertags)
+\end{python}
+
+在tag\_filter函数中，我们会对Lucene的检索结果contents进行遍历，匹配返回符合用户输入的条目。
 
 \begin{python}
 # 商品与给定标签的匹配
@@ -289,80 +362,8 @@ def match_item_one(item,properties,property_name):
     return False
 \end{python}
 
-\begin{python}
-# 标签的统计与排序
-def sort_and_filter(x_count,length):
-    x_tuple = zip(x_count.keys(),x_count.values())
-    x_sorted = sorted(x_tuple,key = lambda kv:(-kv[1], kv[0]))
-    filtered_x = x_sorted[:length]
-    return filtered_x
-
-def total(contents):
-    # 返回三个参数的tuple，三个长度最长为n的[(key,num)]列表，分别是brand，category和feature的tag
-    brand_count = dict()
-    category_count = dict()
-    feature_count = dict()
-    source_count = dict()
-    for item in contents:
-        item = json.loads(item)
-        brand = item['brand']
-        category = item['category']
-        feature = item['feature']
-        source = item['source']
-        if not brand_count.has_key(brand):
-            brand_count[brand] = 0
-        brand_count[brand] += 1
-        if not category_count.has_key(category):
-            category_count[category] = 0
-        category_count[category] += 1
-        if not source_count.has_key(source):
-            source_count[source] = 0
-        source_count[source] += 1
-        for (felem,fnum) in feature.items():
-            if not feature_count.has_key(felem):
-                feature_count[felem] = 0
-            feature_count[felem] += int(fnum)
-
-    brand_tags = sort_and_filter(brand_count,5)
-    category_tags = sort_and_filter(category_count,5)
-    source_tags = sort_and_filter(source_count,2)
-    feature_tags = sort_and_filter(feature_count,10)
-    return [brand_tags,category_tags,feature_tags,source_tags]
-\end{python}
 
 
-\subsection{标签选项陈列}
-
-\begin{python}
-<h4 class="filter-title">品牌</h4>
-$ count = 0
-$for branditem in filtertags[0]:
-	<label class="checkbox">
-		<input type="checkbox" name="brand" id="brand$(count)" value="$(branditem[0])"> $(branditem[0])($(branditem[1]))
-	</label>
-	$ count += 1
-\end{python}
-
-\subsection{标签过滤请求}
-
-\begin{python}
-class filter:
-    def GET(self):
-        user_data = web.input()
-        kw = user_data.keyword
-        method = web.input(method="relativity").method.decode('utf-8')
-        category = web.input(category=[]).category
-        features = web.input(feature=[]).feature
-        brand = web.input(brand=[]).brand
-        source = web.input(source=[]).source
-        vm_env.attachCurrentThread()
-        contents = search_command(kw,method) # 搜索结果
-        filtertags = total(contents) # 统计品牌、属性、特色的结果，即显示在页面左侧所必须的内容
-        filtered_contents = tag_filter(contents,category,features,brand,source)
-                                     # 对搜索结果作筛选
-        results = itemlis(filtered_contents) # 根据筛选结果提取出要显示在页面右侧的所必需的内容
-        return render.result(kw, method, results, filtertags)
-\end{python}
 
 
 \section{商品信息陈列}
