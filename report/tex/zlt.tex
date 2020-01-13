@@ -128,7 +128,7 @@ def pict_search(img):
 
 \part{Web Front-end}
 
-\chapter{Web框架}
+\chapter{Web前端搭建}
 
 在本项目中，前端的搭建基于web.py框架，在页面美化方面采用了Bootstrap框架。下面对Web前端的工作作具体介绍。
 
@@ -179,43 +179,412 @@ class pictsearch:
 
 无论是针对关键词还是图片的search函数，返回值均为一个包含所有检索匹配文档的列表，该列表会作为构造结果页模板的主要参数，决定结果页中的内容。结果页中也包含一个搜索表单和过滤选项，因此也可以发起搜索或过滤的GET请求，再次调用search或filter函数，刷新结果页的内容。
 
-\section{网页功能的实现}
 
-\subsection{搜索主页}
+\section{搜索主页}
 
-搜索主页如图\ref{fig:zlt_index1}、\ref{fig:zlt_index2}、\ref{fig:zlt_index3}所示
+搜索主页如图\ref{fig:zlt_index1}、\ref{fig:zlt_index2}、\ref{fig:zlt_index3}所示。搜索主页包含了一个居中的表单。我们利用CSS样式表对页面进行了一些美化。如下所示的代码实现了背景图右下角的彩虹图案和搜索表单的半透明背景。
+
+\begin{python}
+/*** background picture ***/
+body {
+	background-color: rgb(0,0,0);
+	background-image: url('../img/bg.jpg');
+	background-repeat:no-repeat;
+    background-position:bottom right;
+	background-attachment:fixed
+}
+/*** index page ***/
+#idx
+{
+	background-color: rgba(245,245,245,0.75);
+	margin-top: 50px;
+	padding-top: 50px;
+	padding-bottom: 50px;
+    text-align:center;
+}
+\end{python}
+
+在本项目的前端实现中，我们还利用了Bootstrap的框架，该框架提供了良好的栅格排班系统和表单中需要用到的按钮等元件样式，极大提高了排版的效率和美观程度。我们在网页模板头文件中加入如下代码，即可在网页中调用Bootstrap框架预置的类样式了。
+
+\begin{python}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+\end{python}
+
+以单关键词检索表单为例，HTML代码如下所示。该表单会发起一个名为search的GET请求，传递的参数是一个名为keyword的字符串。
+
+\begin{python}
+# 单关键词检索表单示例
+<form class="form-inline"action="/search" style="padding-bottom:10px " method="GET">
+	<form class="form-inline">
+	<input class="form-control"  style="width:40%"  type="text" id="keyword"
+		   name="keyword" placeholder="Input Your Keyword"/>
+	<button class="btn btn-default" id="Search" name="Search">搜索</button>
+	</form>
+</form>
+\end{python}
+
+最终搜索主页的效果如图\ref{fig:zlt_index1}、\ref{fig:zlt_index2}、\ref{fig:zlt_index3}所示。
 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{img/zlt/searchidx1.png}
+\includegraphics[width=9.5cm]{img/zlt/searchidx1.png}
 \caption{单关键词查询首页}
 \label{fig:zlt_index1}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{img/zlt/searchidx2.png}
+\includegraphics[width=9.5cm]{img/zlt/searchidx2.png}
 \caption{图片查询首页}
 \label{fig:zlt_index2}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=13.5cm]{img/zlt/searchidx3.png}
+\includegraphics[width=9.5cm]{img/zlt/searchidx3.png}
 \caption{多字段查询首页}
 \label{fig:zlt_index3}
 \end{figure}
 
-\subsection{商品信息陈列}
+\section{商品过滤功能}
 
-\subsection{商品过滤功能}
-
-\section{网页美化}
-
-\subsection{Bootstrap框架}
+我们的项目支持对搜索出来的结果进行过滤。
 
 
 
+
+\subsection{统计商品标签}
+
+返回filtertags标签供左侧栏使用
+
+\begin{python}
+# 商品与给定标签的匹配
+def match_item(item,categorys,features,brands,sources):
+    if not match_item_one(item,categorys,'category'):
+        return False
+    if not match_item_feature(item,features,'feature'):
+        return False
+    if not match_item_one(item,brands,'brand'):
+        return False
+    if not match_item_one(item,sources,'source'):
+        return False
+    return True
+
+def match_item_feature(item,properties,property_name):
+    # 与其他属性不同，特色取交集
+    if (not properties):
+        return True
+    for proper in properties:
+        if proper not in item[property_name].keys():
+            return False
+    return True
+
+def match_item_one(item,properties,property_name):
+    if (not properties):
+        return True
+    for proper in properties:
+        if proper == item[property_name]:
+            return True
+    return False
+\end{python}
+
+\begin{python}
+# 标签的统计与排序
+def sort_and_filter(x_count,length):
+    x_tuple = zip(x_count.keys(),x_count.values())
+    x_sorted = sorted(x_tuple,key = lambda kv:(-kv[1], kv[0]))
+    filtered_x = x_sorted[:length]
+    return filtered_x
+
+def total(contents):
+    # 返回三个参数的tuple，三个长度最长为n的[(key,num)]列表，分别是brand，category和feature的tag
+    brand_count = dict()
+    category_count = dict()
+    feature_count = dict()
+    source_count = dict()
+    for item in contents:
+        item = json.loads(item)
+        brand = item['brand']
+        category = item['category']
+        feature = item['feature']
+        source = item['source']
+        if not brand_count.has_key(brand):
+            brand_count[brand] = 0
+        brand_count[brand] += 1
+        if not category_count.has_key(category):
+            category_count[category] = 0
+        category_count[category] += 1
+        if not source_count.has_key(source):
+            source_count[source] = 0
+        source_count[source] += 1
+        for (felem,fnum) in feature.items():
+            if not feature_count.has_key(felem):
+                feature_count[felem] = 0
+            feature_count[felem] += int(fnum)
+
+    brand_tags = sort_and_filter(brand_count,5)
+    category_tags = sort_and_filter(category_count,5)
+    source_tags = sort_and_filter(source_count,2)
+    feature_tags = sort_and_filter(feature_count,10)
+    return [brand_tags,category_tags,feature_tags,source_tags]
+\end{python}
+
+
+\subsection{标签选项陈列}
+
+\begin{python}
+<h4 class="filter-title">品牌</h4>
+$ count = 0
+$for branditem in filtertags[0]:
+	<label class="checkbox">
+		<input type="checkbox" name="brand" id="brand$(count)" value="$(branditem[0])"> $(branditem[0])($(branditem[1]))
+	</label>
+	$ count += 1
+\end{python}
+
+\subsection{标签过滤请求}
+
+\begin{python}
+class filter:
+    def GET(self):
+        user_data = web.input()
+        kw = user_data.keyword
+        method = web.input(method="relativity").method.decode('utf-8')
+        category = web.input(category=[]).category
+        features = web.input(feature=[]).feature
+        brand = web.input(brand=[]).brand
+        source = web.input(source=[]).source
+        vm_env.attachCurrentThread()
+        contents = search_command(kw,method) # 搜索结果
+        filtertags = total(contents) # 统计品牌、属性、特色的结果，即显示在页面左侧所必须的内容
+        filtered_contents = tag_filter(contents,category,features,brand,source)
+                                     # 对搜索结果作筛选
+        results = itemlis(filtered_contents) # 根据筛选结果提取出要显示在页面右侧的所必需的内容
+        return render.result(kw, method, results, filtertags)
+\end{python}
+
+
+\section{商品信息陈列}
+
+\begin{python}
+# 网页模板参数
+def with (kw,method,contents,filtertags)
+\end{python}
+
+\begin{python}
+# 读取商品信息
+def read_results(scoreDocs, searcher):
+    # 读取lucene检索结果对象ScoreDocs
+    # 输出一个结果res_lis，list的元素是一个包含了商品所有信息的json串，在网页中可以用json.loads()解码
+    res_lis = []
+    for i, scoreDoc in enumerate(scoreDocs):
+        doc = searcher.doc(scoreDoc.doc)
+        item = dict()
+        item['imgurl'] = doc.get("imgurl").strip()
+        item['url'] = doc.get("url").strip()
+        item['title'] = "".join(doc.get("title").split())
+        item['brand'] = doc.get("brand")
+        item['price'] = doc.get("price")
+        item['rank'] = doc.get("score")
+        item['category'] = doc.get("attribute")
+        item['source'] = doc.get("website")
+
+        # 商品具体属性
+        itemdet = dict()
+        detseg = doc.get("detail").split('\t')
+        for detail in detseg:
+            detailseg = detail.split(':')
+            if len(detail)>1:
+                itemdet[detailseg[0]]=detailseg[1]
+        item['detail'] = itemdet
+
+        # 商品评价tag
+        itemfeat = dict()
+        featseg = re.split(' ',doc.get("tag"))
+        for feat in featseg:
+            featureseg = feat.split('\t')
+            if (len(featureseg)>1):
+                itemfeat[featureseg[0].strip()]=featureseg[1]
+        item['feature'] = itemfeat
+        res_lis.append(json.dumps(item))
+    return res_lis
+\end{python}
+
+
+
+\begin{python}
+# 陈列商品信息
+$def showdetails(details):
+	<dl class="dl-horizontal">
+	$for detail in (details):
+		<dt>$(detail)</dt><dd>$(details[detail])</dd>
+	</dl>
+$def showfeatures(features):
+	$for feature in (features):
+		<button type="button" class="btn btn-default btn-sm">$(feature) ($(features[feature]))</button>
+\end{python}
+
+\begin{python}
+<div class='result_contents'>
+		$ count = 0
+		$ pagecount = 0
+		$for item in contents:
+			$ count += 1
+			$if (count%10 == 1):
+				$ pagecount += 1
+				<div id='page$(pagecount)' style="display: none;">
+			<div class='row'>
+				<div class='res' id='res$(count)'>
+					<div class='col-md-3'>
+						<a class='thumbnail' href='$(item["url"])'>
+							<img class='img-responsive' src='$(item["imgurl"])' alt='$(item["title"])'>
+						</a>
+					</div>
+					<div class='col-md-9'>
+						<div class='row'>
+							<a class="thumbnail" href='$(item["url"])'>
+							<h3 style="width: 90%;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;">
+								$(item["title"])
+							</h3>
+							</a>
+						</div>
+						<div>
+							<div class="col-md-4">
+								<h4 class="price">￥ $("{:.2f}".format(int(item["price"])/100)) </h4>
+								<p class="attributes"> $(item["category"]), $(item["brand"]), 评分 $(item["rank"])
+								</p>
+							<div>
+								$:showfeatures((item["feature"]))
+							</div>
+							</div>
+							<div class="col-md-8">
+								$:showdetails((item["detail"]))
+							</div>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+			$:pageend1(count)
+		$:pageend2(count)
+	</div>
+\end{python}
+
+打印出了pageend的标签，这会在下一节介绍。
+
+\section{翻页功能}
+
+打印pageend标签，实现分区
+\begin{python}
+$def pageend1(count):
+	$if (count%10 == 0):
+		</div> <!-- end of page$(count/10)-->
+
+$def pageend2(count):
+	$if (count%10 != 0):
+		</div> <!-- end of page$(count/10)-->
+\end{python}
+
+初始化
+
+\begin{python}
+<script type="text/javascript">
+    function init() { 
+		document.getElementById("page1").style.display="";
+		document.getElementById("pg1").setAttribute("class","active");
+    };
+    init();
+</script>
+\end{python}
+
+\begin{python}
+# 按钮的JavaScript函数
+var pages = $(pagecount);
+function start()
+{
+	var pages = $(pagecount);
+	document.getElementById("page1").style.display="";
+	for (var it=2;it<=pages;++it)
+	{
+		var itit="page"+it.toString();
+		document.getElementById(itit).style.display="none";
+		document.getElementById("pg"+it.toString()).setAttribute("class","");
+	}
+	document.getElementById("pg1").setAttribute("class","active");
+}
+function end()
+{
+	var pages = $(pagecount);
+	for (var it=1;it<pages;++it)
+	{
+		var itit="page"+it.toString();
+		document.getElementById(itit).style.display="none";
+		document.getElementById("pg"+it.toString()).setAttribute("class","");
+	}
+	document.getElementById("page"+pages.toString()).style.display="";
+	document.getElementById("pg"+pages.toString()).setAttribute("class","active");
+}
+$for i in range(pagecount):
+	function pg$(i+1)()
+	{
+		var pages = $(pagecount);
+		for (var it=1;it<=pages;++it){
+			var itit="page"+it.toString();
+			document.getElementById(itit).style.display="none";
+			document.getElementById("pg"+it.toString()).setAttribute("class","");
+		}
+		document.getElementById("page$(i+1)").style.display="";
+		document.getElementById("pg$(i+1)").setAttribute("class","active");
+	}
+\end{python}
 
 \chapter{项目成果}
+
+\section{单关键词检索效果}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/zlt/result1.png}
+\caption{联想 笔记本 轻薄 为关键词的检索结果}
+\label{fig:zlt_result1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/zlt/decreasing_price.png}
+\caption{联想 笔记本 轻薄 为关键词的价格降序检索结果}
+\label{fig:zlt_decreasing_price}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/zlt/high_rank.png}
+\caption{联想 笔记本 轻薄 为关键词的按评价排序检索结果}
+\label{fig:zlt_high_rank}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/zlt/leafflip.png}
+\caption{页面底部的翻页效果}
+\label{fig:zlt_leaf_flip}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/zlt/filter1.png}
+\caption{结果过滤选项}
+\label{fig:zlt_filter1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{img/zlt/filter1_result.png}
+\caption{过滤结果}
+\label{fig:zlt_filter1_result}
+\end{figure}
+
+\section{logo匹配}
+
+\section{图片LSH匹配}
