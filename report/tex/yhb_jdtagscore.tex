@@ -93,7 +93,7 @@ headers = {'User-Agent':'Mozilla/5.0 '
 如果没有这个请求头，request返回的内容很有可能为空。
 
 \subsection{提取数据}
-我们对爬取的数据分析发现，此数据为跨域请求返回的json结果，所以我们只要把前面的"\textbf{fetchJSON \_ comment98vv4646(}"和最后的"\textbf{)}"去掉就拿到json数据了。
+我们对爬取的数据分析发现，此数据为跨域请求返回的json结果，所以我们只要把前面的“\textbf{fetchJSON \_ comment98vv4646(}”和最后的“\textbf{)}”去掉就拿到json数据了。
 
 \begin{python}
 raw = r.text[:]
